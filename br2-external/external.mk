@@ -1,4 +1,4 @@
-include $(sort $(wildcard $(BR2_EXTERNAL_NerveOS_PATH)/package/*/*.mk))
+include $(sort $(wildcard $(BR2_EXTERNAL_NERVEOS_PATH)/package/*/*.mk))
 
 # host-libffi 3.4.4 tramp.c fails with newer GCC (open_temp_exec_file undeclared)
 HOST_LIBFFI_CONF_OPTS += --disable-exec-static-tramp

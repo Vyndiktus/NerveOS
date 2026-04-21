@@ -15,7 +15,7 @@ HIVED_BIN_NAME = hived
 
 define HIVED_INSTALL_TARGET_CMDS
 	$(INSTALL) -D -m 0755 $(@D)/bin/hived $(TARGET_DIR)/usr/bin/hived
-	$(INSTALL) -D -m 0644 $(BR2_EXTERNAL_NerveOS_PATH)/package/hived/hived.init \
+	$(INSTALL) -D -m 0644 $(BR2_EXTERNAL_NERVEOS_PATH)/package/hived/hived.init \
 		$(TARGET_DIR)/etc/init.d/S99hived
 endef
 

@@ -14,9 +14,9 @@ PYTHON_RNS_LICENSE_FILES = LICENSE
 PYTHON_RNS_DEPENDENCIES = python-cryptography python-serial
 
 define PYTHON_RNS_INSTALL_INIT_SYSV
-	$(INSTALL) -D -m 0755 $(BR2_EXTERNAL_NerveOS_PATH)/package/python-rns/S60reticulum \
+	$(INSTALL) -D -m 0755 $(BR2_EXTERNAL_NERVEOS_PATH)/package/python-rns/S60reticulum \
 		$(TARGET_DIR)/etc/init.d/S60reticulum
-	$(INSTALL) -D -m 0644 $(BR2_EXTERNAL_NerveOS_PATH)/package/python-rns/reticulum.config \
+	$(INSTALL) -D -m 0644 $(BR2_EXTERNAL_NERVEOS_PATH)/package/python-rns/reticulum.config \
 		$(TARGET_DIR)/etc/reticulum/config
 endef
 
