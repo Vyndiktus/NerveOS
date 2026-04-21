@@ -1,0 +1,113 @@
+#!/bin/sh
+# S50batman — HiveOS BATMAN-adv mesh transport setup
+# Runs before hived (S99) and Reticulum (S60).
+#
+# Sets up an 802.11s mesh point on every wireless interface that isn't
+# already in use, then adds it to the batman-adv bat0 virtual interface.
+# bat0 becomes the unified L2 mesh backbone — all traffic above it
+# (mDNS, WireGuard, DHCP) works transparently across multiple hops.
+
+MESH_SSID="hiveos-mesh"
+MESH_FREQ="2412"        # 2.4GHz ch1 default; HaLow nodes override in udev
+MESH_IFACE="bat0"
+BATMAN_MOD="batman_adv"
+
+log() { echo "[batman] $*" | tee -a /var/log/batman.log; }
+
+case "$1" in
+start)
+    log "Loading batman_adv module..."
+    modprobe $BATMAN_MOD 2>/dev/null || {
+        log "WARNING: batman_adv module not available — mesh transport disabled"
+        exit 0
+    }
+
+    # Discover wireless interfaces (wlan*, mlan*, etc.)
+    WLAN_IFACES=$(iw dev 2>/dev/null | awk '/Interface/{print $2}' | grep -v $MESH_IFACE)
+
+    if [ -z "$WLAN_IFACES" ]; then
+        log "No wireless interfaces found — skipping batman-adv setup"
+        exit 0
+    fi
+
+    ADDED=0
+    for IFACE in $WLAN_IFACES; do
+        log "Configuring $IFACE as 802.11s mesh point..."
+
+        # Bring down, switch to mesh point mode
+        ip link set "$IFACE" down 2>/dev/null
+        iw dev "$IFACE" set type mesh 2>/dev/null || {
+            log "WARNING: $IFACE does not support mesh mode, skipping"
+            continue
+        }
+        ip link set "$IFACE" up
+
+        # Join the HiveOS mesh cell
+        iw dev "$IFACE" mesh join "$MESH_SSID" freq "$MESH_FREQ" 2>/dev/null || {
+            log "WARNING: $IFACE could not join mesh $MESH_SSID"
+            continue
+        }
+
+        # Disable mesh peer exchange — batman-adv handles routing
+        iw dev "$IFACE" set mesh_param mesh_fwding 0 2>/dev/null
+
+        # Add to batman-adv
+        batctl if add "$IFACE" && {
+            log "$IFACE added to batman-adv"
+            ADDED=$((ADDED + 1))
+        }
+    done
+
+    if [ "$ADDED" -eq 0 ]; then
+        log "No interfaces added to batman-adv"
+        exit 0
+    fi
+
+    # Bring up the batman-adv virtual interface
+    ip link set "$MESH_IFACE" up
+    log "bat0 up — $ADDED interface(s) in mesh"
+
+    # Use batman-adv routing algorithm V (better for mobile nodes)
+    batctl routing_algo BATMAN_V 2>/dev/null
+
+    # Start DHCP client on bat0 to get a LAN IP if a gate node is present
+    dhcpcd "$MESH_IFACE" -b 2>/dev/null &
+
+    log "BATMAN-adv mesh transport ready"
+    ;;
+
+stop)
+    log "Stopping batman-adv..."
+    dhcpcd -k "$MESH_IFACE" 2>/dev/null
+    ip link set "$MESH_IFACE" down 2>/dev/null
+    for IFACE in $(batctl if 2>/dev/null | awk '{print $1}'); do
+        batctl if del "$IFACE" 2>/dev/null
+    done
+    rmmod $BATMAN_MOD 2>/dev/null
+    log "BATMAN-adv stopped"
+    ;;
+
+status)
+    echo "=== BATMAN-adv interfaces ==="
+    batctl if 2>/dev/null || echo "(batman-adv not running)"
+    echo ""
+    echo "=== Mesh neighbors ==="
+    batctl n 2>/dev/null || echo "(no neighbors)"
+    echo ""
+    echo "=== Routing table ==="
+    batctl o 2>/dev/null | head -20
+    ;;
+
+restart)
+    $0 stop
+    sleep 1
+    $0 start
+    ;;
+
+*)
+    echo "Usage: $0 {start|stop|status|restart}"
+    exit 1
+    ;;
+esac
+
+exit 0

@@ -1,0 +1,23 @@
+Disable KALLSYMS_BASE_RELATIVE to fix vmlinux link with Bootlin toolchain.
+
+The Bootlin aarch64-glibc-stable toolchain places the kernel at virtual
+address 0xffffff8008080000. KALLSYMS_BASE_RELATIVE stores symbol offsets
+as 32-bit values relative to the lowest symbol address; the gap between
+the kernel link base and this address exceeds 2^31, causing the
+"relative symbol value out of range in relative mode" error during
+vmlinux assembly.
+
+Changing the default to n causes kallsyms to fall back to absolute 64-bit
+addresses, which always work at the cost of slightly larger kallsyms table.
+KALLSYMS_BASE_RELATIVE is a promptless bool and cannot be overridden by
+config fragments.
+
+--- a/init/Kconfig
++++ b/init/Kconfig
+@@ -1347,7 +1347,7 @@ config KALLSYMS_BASE_RELATIVE
+ 	bool
+ 	depends on KALLSYMS
+-	default !IA64 && !(TILE && 64BIT)
++	default n
+ 	help
+ 	  Instead of emitting them as absolute values in the native word size,

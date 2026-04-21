@@ -1,0 +1,79 @@
+#!/bin/sh
+mount -t proc none /proc
+mount -t sysfs none /sys
+mount -t devtmpfs none /dev 2>/dev/null
+/bin/mdev -s 2>/dev/null
+mount -t configfs none /sys/kernel/config 2>/dev/null
+
+# Boot logo: background job, writes to fb0 after USB gadget is bound
+(
+    i=0
+    while [ $i -lt 20 ]; do
+        [ -c /dev/fb0 ] && break
+        sleep 1; i=$((i+1))
+    done
+    if [ -c /dev/fb0 ]; then
+        sleep 5
+        busybox gzip -d -c /logo.gz | busybox dd of=/dev/fb0 bs=4096 2>/dev/null
+    fi
+) &
+
+/sbin/getty -n -l /bin/sh ttyMSM0 115200 vt100 &
+
+echo "HiveOS: waiting for UDC..."
+i=0
+while [ $i -lt 60 ]; do
+  UDC=$(ls /sys/class/udc/ 2>/dev/null | head -1)
+  [ -n "$UDC" ] && break
+  sleep 1
+  i=$((i+1))
+done
+
+if [ -z "$UDC" ]; then
+  echo "No UDC — staying in initramfs"
+  while true; do sleep 60; done
+fi
+
+echo "UDC: $UDC"
+G=/sys/kernel/config/usb_gadget/g0
+mkdir -p $G
+echo 0x1d6b > $G/idVendor
+echo 0x0104 > $G/idProduct
+mkdir -p $G/strings/0x409
+echo "NerveOS" > $G/strings/0x409/manufacturer
+echo "Debug" > $G/strings/0x409/product
+echo "00000001" > $G/strings/0x409/serialnumber
+mkdir -p $G/functions/acm.0
+mkdir -p $G/configs/c.1/strings/0x409
+echo 250 > $G/configs/c.1/MaxPower
+echo "ACM" > $G/configs/c.1/strings/0x409/configuration
+ln -sf $G/functions/acm.0 $G/configs/c.1/
+echo "$UDC" > $G/UDC
+echo "ACM bound"
+sleep 2
+
+i=0
+while [ $i -lt 60 ]; do
+  [ -b /dev/sda31 ] && break
+  sleep 1; i=$((i+1))
+done
+
+if ! [ -b /dev/sda31 ]; then
+  echo "sda31 missing"
+  exec /sbin/getty -n -l /bin/sh ttyGS0 115200 vt100
+fi
+
+mkdir -p /newroot
+mount -t ext4 /dev/sda31 /newroot || { echo "mount failed"; exec /sbin/getty -n -l /bin/sh ttyGS0 115200 vt100; }
+
+mkdir -p /newroot/dev  && mount -t devtmpfs devtmpfs /newroot/dev
+mkdir -p /newroot/proc && mount -t proc     proc     /newroot/proc
+mkdir -p /newroot/sys  && mount -t sysfs    sysfs    /newroot/sys
+
+stty clocal -hupcl 115200 < /dev/ttyGS0 2>/dev/null || true
+
+echo "Pivoting to NerveOS rootfs..."
+exec busybox switch_root /newroot /sbin/init
+
+echo "switch_root failed"
+exec /sbin/getty -n -l /bin/sh ttyGS0 115200 vt100

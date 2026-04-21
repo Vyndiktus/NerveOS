@@ -1,0 +1,107 @@
+---
+# Xiaomi Mi 9 — NerveOS Device Profile
+id: cepheus
+name: Xiaomi Mi 9
+codename: cepheus
+vendor: Xiaomi
+soc: Qualcomm Snapdragon 855 (SM8150)
+arch: aarch64
+ram_mb: 6144          # base model; 8192 for 8GB variant
+storage_gb: 128
+usb_ids:
+  # Xiaomi fastboot USB IDs
+  - vendor_id: "0x2717"
+    product_id: "0xff48"
+    mode: fastboot
+  # Xiaomi ADB USB IDs
+  - vendor_id: "0x2717"
+    product_id: "0xff40"
+    mode: adb
+
+bootloader:
+  type: abl              # Android Boot Loader (Qualcomm)
+  unlock_required: true
+  unlock_method: mi_unlock
+  unlock_notes: |
+    1. Enable Developer Options → OEM Unlocking
+    2. Apply for unlock at https://www.mi.com/global/service/support/unlock.html
+    3. Download Mi Unlock Tool (Windows only)
+    4. Boot to fastboot: hold Vol- + Power
+    5. Run Mi Unlock Tool and follow prompts
+    WARNING: Unlocking wipes all data.
+
+partitions:
+  # Standard cepheus partition layout (non-A/B for boot, A/B for system on some variants)
+  boot:     boot
+  dtbo:     dtbo
+  system:   system
+  vendor:   vendor
+  userdata: userdata
+
+kernel:
+  source: https://github.com/MiCode/Xiaomi_Kernel_OpenSource
+  branch: cepheus-q-oss
+  defconfig: vendor/cepheus_defconfig
+  dtb: arch/arm64/boot/dts/qcom/sm8150-v2.dtb
+
+firmware:
+  # Proprietary blobs required — extract from stock MIUI ROM
+  required:
+    - lib/firmware/qcom/sm8150/
+    - lib/firmware/wlan/qca_cld3/
+    - lib/firmware/ath10k/
+  extract_from: miui_MICEPHEUS_*.zip
+
+buildroot:
+  defconfig: NerveOS_cepheus_defconfig
+  toolchain: aarch64-linux-gnu
+
+flash_sequence:
+  - partition: boot
+    image: boot.img
+    flags: []
+  - partition: system
+    image: rootfs.img
+    flags: [--disable-verity, --disable-verification]
+
+transport:
+  # Radio interfaces available on cepheus and their capabilities
+  interfaces:
+    - type: wifi
+      kernel_driver: qca_cld3_wlan        # Qualcomm WCN3990
+      firmware: lib/firmware/wlan/qca_cld3/
+      modes: [ap, station, mesh_point]    # 802.11s mesh point supported
+      bands: [2.4GHz, 5GHz]
+      batman_capable: true                # can be added to bat0
+
+    - type: bluetooth
+      kernel_driver: btqca
+      version: "5.0"
+      batman_capable: false               # BT not used for batman-adv
+
+  # HaLow (802.11ah) — NOT present on cepheus
+  # Requires external USB/SPI HaLow adapter (Morse Micro MM601X)
+  halow: false
+
+  # LoRa — NOT present on cepheus
+  # Requires external USB LoRa module (e.g. RAK2287 via USB)
+  lora: false
+  lora_port: /dev/ttyUSB0               # if added externally
+
+  # Reticulum — enabled (uses WiFi/batman-adv as carrier)
+  reticulum: true
+
+  # Default discovery mode
+  discovery: both                        # mDNS (WiFi/batman) + RNS (when available)
+
+hive:
+  # Resources this device advertises to the hive
+  advertise:
+    cpu: true
+    ram: true
+    storage: true
+  # Minimum reserves — never give these to the hive
+  reserve:
+    ram_mb: 512
+    storage_gb: 2
+    cpu_percent: 20

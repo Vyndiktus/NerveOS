@@ -1,0 +1,24 @@
+Disable KASLR in cepheus_user_defconfig to fix kallsyms relative mode failure.
+
+The Bootlin aarch64-glibc toolchain links the kernel at a fixed address
+(0xffffff8008080000) that is out of range for CONFIG_KALLSYMS_BASE_RELATIVE
+encoding. KASLR has no effect without bootloader entropy support anyway.
+Disabling RANDOMIZE_BASE causes KALLSYMS_BASE_RELATIVE to also be cleared,
+resolving the "relative symbol value out of range in relative mode" linker
+error during vmlinux assembly.
+
+CONFIG_RANDOMIZE_BASE=n in the config fragment is overridden by silentoldconfig
+because the base defconfig explicitly sets it; patching the defconfig directly
+ensures it survives kconfig fixup.
+
+--- a/arch/arm64/configs/cepheus_user_defconfig
++++ b/arch/arm64/configs/cepheus_user_defconfig
+@@ -82,7 +82,7 @@
+ CONFIG_CP15_BARRIER_EMULATION=y
+ CONFIG_SETEND_EMULATION=y
+ # CONFIG_ARM64_VHE is not set
+-CONFIG_RANDOMIZE_BASE=y
++# CONFIG_RANDOMIZE_BASE is not set
+ # CONFIG_EFI is not set
+ CONFIG_BUILD_ARM64_APPENDED_DTB_IMAGE=y
+ CONFIG_BUILD_ARM64_UNCOMPRESSED_KERNEL=y

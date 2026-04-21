@@ -1,0 +1,67 @@
+#!/bin/sh
+# S60reticulum — HiveOS Reticulum Network Stack daemon
+# Starts rnsd, which manages encrypted transport over all available interfaces.
+# Runs after batman-adv (S50) so RNS can use bat0 as a transport.
+
+DAEMON="rnsd"
+CONFIG_DIR="/etc/reticulum"
+PIDFILE="/var/run/rnsd.pid"
+LOGFILE="/var/log/rnsd.log"
+
+log() { echo "[reticulum] $*"; }
+
+case "$1" in
+start)
+    log "Starting Reticulum daemon..."
+
+    # Ensure config directory exists
+    mkdir -p "$CONFIG_DIR"
+
+    # Install default config if missing
+    if [ ! -f "$CONFIG_DIR/config" ]; then
+        log "No config found — using default"
+        cp /etc/reticulum/config.default "$CONFIG_DIR/config" 2>/dev/null || true
+    fi
+
+    start-stop-daemon -S -b \
+        -p "$PIDFILE" \
+        -x /usr/bin/rnsd \
+        -- --config "$CONFIG_DIR" \
+        >> "$LOGFILE" 2>&1
+
+    sleep 1
+    if start-stop-daemon --status -p "$PIDFILE"; then
+        log "rnsd running (PID $(cat $PIDFILE))"
+    else
+        log "WARNING: rnsd failed to start — check $LOGFILE"
+    fi
+    ;;
+
+stop)
+    log "Stopping Reticulum daemon..."
+    start-stop-daemon -K -p "$PIDFILE" 2>/dev/null
+    log "rnsd stopped"
+    ;;
+
+status)
+    if start-stop-daemon --status -p "$PIDFILE" 2>/dev/null; then
+        echo "rnsd running"
+        rnstatus 2>/dev/null || true
+    else
+        echo "rnsd not running"
+    fi
+    ;;
+
+restart)
+    $0 stop
+    sleep 1
+    $0 start
+    ;;
+
+*)
+    echo "Usage: $0 {start|stop|status|restart}"
+    exit 1
+    ;;
+esac
+
+exit 0

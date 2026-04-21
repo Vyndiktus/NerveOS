@@ -1,0 +1,30 @@
+[Version]
+Signature           = "$Windows NT$"
+Class               = USB
+ClassGuid           = {36FC9E60-C465-11CF-8056-444553540000}
+Provider            = %ProviderName%
+DriverVer           = 04/18/2026,1.0.0.0
+
+[Manufacturer]
+%ProviderName% = Google, NTamd64
+
+[Google.NTamd64]
+%SingleBootLoaderInterface% = USB_Install, USB\VID_18D1&PID_D00D
+
+[USB_Install]
+Include = winusb.inf
+Needs   = WINUSB.NT
+
+[USB_Install.Services]
+Include    = winusb.inf
+Needs      = WINUSB.NT.Services
+
+[USB_Install.HW]
+AddReg = Dev_AddReg
+
+[Dev_AddReg]
+HKR,,DeviceInterfaceGUIDs,0x10000,"{F72FE0D4-CBCB-407d-8814-9ED673D0DD6B}"
+
+[Strings]
+ProviderName              = "HiveOS"
+SingleBootLoaderInterface = "Android Bootloader Interface"

@@ -1,0 +1,2 @@
+source "$BR2_EXTERNAL_NerveOS_PATH/package/hived/Config.in"
+source "$BR2_EXTERNAL_NerveOS_PATH/package/python-rns/Config.in"

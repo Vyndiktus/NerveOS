@@ -1,0 +1,27 @@
+#!/bin/sh
+# hive — HiveOS CLI shim
+# Provides user-facing commands: hive status, hive peers, hive join, etc.
+
+HIVED_SOCK=/var/run/hived.sock
+
+case "$1" in
+  status)
+    echo "HiveOS hived status:"
+    # TODO: query hived via unix socket / HTTP API
+    systemctl status hived 2>/dev/null || \
+      start-stop-daemon --status --pidfile /var/run/hived.pid && echo "running" || echo "stopped"
+    ;;
+  peers)
+    echo "Hive peers:"
+    wg show hive0 peers 2>/dev/null || echo "(no WireGuard interface — is hived running?)"
+    ;;
+  join)
+    echo "Joining hive: $2"
+    # TODO: contact bootstrap peer, exchange keys, update config
+    echo "Not yet implemented — coming in hived v0.2"
+    ;;
+  *)
+    echo "Usage: hive {status|peers|join <bootstrap-addr>}"
+    exit 1
+    ;;
+esac

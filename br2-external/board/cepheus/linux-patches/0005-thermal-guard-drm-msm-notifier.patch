@@ -1,0 +1,30 @@
+Guard thermal DRM notifier on CONFIG_DRM_MSM, not CONFIG_DRM.
+
+drm_register_client/drm_unregister_client are Qualcomm MSM-specific
+additions defined in drivers/gpu/drm/msm/dsi-staging/dsi_drm.c.
+They are not part of the standard DRM API and are unavailable when
+CONFIG_DRM_MSM=n, causing undefined reference link failures.
+Change the guard to CONFIG_DRM_MSM which accurately reflects the
+dependency.
+
+--- a/drivers/thermal/thermal_core.c
++++ b/drivers/thermal/thermal_core.c
+@@ -1863,7 +1863,7 @@ static int __init thermal_init(void)
+ 	if (result)
+ 		pr_warn("Thermal: create thermal message node failed, return %d\n",
+ 			result);
+
+-#ifdef CONFIG_DRM
++#ifdef CONFIG_DRM_MSM
+ 	sm.thermal_notifier.notifier_call = screen_state_for_thermal_callback;
+ 	if (drm_register_client(&sm.thermal_notifier) < 0) {
+ 		pr_warn("Thermal: register screen state callback failed\n");
+@@ -1888,7 +1888,7 @@ static int __init thermal_init(void)
+
+ static void thermal_exit(void)
+ {
+-#ifdef CONFIG_DRM
++#ifdef CONFIG_DRM_MSM
+ 	drm_unregister_client(&sm.thermal_notifier);
+ #endif
+ 	unregister_pm_notifier(&thermal_pm_nb);

@@ -1,0 +1,14 @@
+config BR2_PACKAGE_PYTHON_RNS
+	bool "python-rns"
+	depends on BR2_PACKAGE_PYTHON3
+	select BR2_PACKAGE_PYTHON_CRYPTOGRAPHY
+	select BR2_PACKAGE_PYTHON_SERIAL
+	help
+	  Reticulum Network Stack (RNS) — a cryptography-based networking
+	  stack for building unstoppable networks with LoRa, WiFi, BATMAN-adv,
+	  packet radio, and anything in between.
+
+	  Provides rnsd (daemon), rnstatus, rnpath, and the RNS Python API
+	  used by hived for multi-transport peer discovery.
+
+	  https://github.com/markqvist/Reticulum

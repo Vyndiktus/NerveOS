@@ -1,0 +1,19 @@
+Disable __rticdata section attribute to fix R_AARCH64_ADR_PREL_PG_HI21
+relocation overflow at vmlinux link time with modern binutils.
+
+The .bss.rtic section is placed by the linker script in a location too
+far from .text for page-relative addressing when building with the
+Bootlin aarch64 glibc toolchain. Making __rticdata a no-op places
+these variables in normal .bss, resolving the overflow.
+
+--- a/include/linux/init.h
++++ b/include/linux/init.h
+@@ -289,7 +289,7 @@
+ #define __randomize_layout __attribute__((randomize_layout))
+ #define __no_randomize_layout __attribute__((no_randomize_layout))
+ /* Reserved for use with erasure after use (such as: sensitive init data) */
+-#define __rticdata  __attribute__((section(".bss.rtic")))
++#define __rticdata  /* rtic section disabled: relocation overflow with modern binutils */
+ #else
+ #define __no_randomize_layout
+ #define __randomize_layout

@@ -1,0 +1,73 @@
+# NerveOS — Xiaomi Mi 9 (cepheus) Buildroot configuration
+# Target: Qualcomm Snapdragon 855 (SM8150), ARM64 (aarch64)
+# Buildroot: 2024.02
+
+# ── Architecture ─────────────────────────────────────────────────
+BR2_aarch64=y
+
+# ── Toolchain — Bootlin prebuilt (aarch64 glibc, stable) ─────────
+BR2_TOOLCHAIN_EXTERNAL=y
+BR2_TOOLCHAIN_EXTERNAL_BOOTLIN=y
+BR2_TOOLCHAIN_EXTERNAL_BOOTLIN_AARCH64_GLIBC_STABLE=y
+
+# ── Kernel — sm8150-mainline 6.11 ────────────────────────────────
+BR2_LINUX_KERNEL=y
+BR2_LINUX_KERNEL_CUSTOM_GIT=y
+BR2_LINUX_KERNEL_CUSTOM_REPO_URL="https://github.com/map220v/sm8150-mainline"
+BR2_LINUX_KERNEL_CUSTOM_REPO_VERSION="4a8d88483"
+BR2_LINUX_KERNEL_USE_CUSTOM_CONFIG=y
+BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE="$(BR2_EXTERNAL_NERVEOS_PATH)/board/cepheus/linux-mainline.config"
+BR2_LINUX_KERNEL_PATCH="$(BR2_EXTERNAL_NERVEOS_PATH)/board/cepheus/linux-patches-mainline"
+BR2_LINUX_KERNEL_IMAGE_TARGET_NAME="Image"
+BR2_LINUX_KERNEL_DTS="qcom/sm8150-xiaomi-cepheus"
+BR2_LINUX_KERNEL_NEEDS_HOST_OPENSSL=y
+BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="$(BR2_EXTERNAL_NERVEOS_PATH)/board/cepheus/kernel-nerveos-mainline.config"
+
+# ── System ───────────────────────────────────────────────────────
+BR2_TARGET_GENERIC_HOSTNAME="NerveOS"
+BR2_TARGET_GENERIC_ISSUE="NerveOS 0.1 — The Hive Awakens"
+BR2_INIT_SYSV=y
+BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_EUDEV=y
+
+# ── Filesystem — ext4 rootfs image ──────────────────────────────
+BR2_TARGET_ROOTFS_EXT2=y
+BR2_TARGET_ROOTFS_EXT2_4=y
+BR2_TARGET_ROOTFS_EXT2_SIZE="2048M"
+
+# ── Rootfs overlay ───────────────────────────────────────────────
+BR2_ROOTFS_OVERLAY="$(BR2_EXTERNAL_NERVEOS_PATH)/../rootfs-overlay"
+BR2_ROOTFS_POST_BUILD_SCRIPT="$(BR2_EXTERNAL_NERVEOS_PATH)/board/cepheus/post-build.sh"
+
+# ── Networking ───────────────────────────────────────────────────
+BR2_PACKAGE_WIREGUARD_TOOLS=y
+BR2_PACKAGE_OPENSSL=y
+BR2_PACKAGE_DHCPCD=y
+BR2_PACKAGE_WPA_SUPPLICANT=y
+BR2_PACKAGE_WPA_SUPPLICANT_WIFI_DISPLAY=y
+BR2_PACKAGE_IW=y
+BR2_PACKAGE_IPTABLES=y
+
+# ── BATMAN-adv mesh (Haven transport layer) ───────────────────────
+BR2_PACKAGE_BATCTL=y
+
+# ── Python 3 — required for Reticulum ────────────────────────────
+BR2_PACKAGE_PYTHON3=y
+BR2_PACKAGE_PYTHON_CRYPTOGRAPHY=y
+BR2_PACKAGE_PYTHON_SERIAL=y
+
+# ── Reticulum (RNS) — encrypted multi-radio overlay ──────────────
+BR2_PACKAGE_PYTHON_RNS=y
+
+# ── Base system ──────────────────────────────────────────────────
+BR2_PACKAGE_BUSYBOX=y
+BR2_PACKAGE_E2FSPROGS=y
+BR2_PACKAGE_UTIL_LINUX=y
+BR2_PACKAGE_DROPBEAR=y
+
+# ── NerveOS daemon ────────────────────────────────────────────────
+BR2_PACKAGE_HIVED=y
+
+# ── Host tools ───────────────────────────────────────────────────
+BR2_PACKAGE_HOST_GO=y
+BR2_PACKAGE_HOST_OPENSSL=y
+BR2_PACKAGE_HOST_MKIMAGE=y

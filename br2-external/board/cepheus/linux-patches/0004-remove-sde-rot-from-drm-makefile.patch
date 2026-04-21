@@ -1,0 +1,19 @@
+Remove sde_hw_rot.o from DRM_MSM build when SDE rotator is disabled.
+
+sde_hw_rot.c calls sde_rotator_inline_* symbols from the SDE rotator
+media driver (CONFIG_MSM_SDE_ROTATOR). With that driver disabled, the
+DRM_MSM link fails with undefined reference errors. Since we disable
+the SDE rotator (cross-subsystem undefined references with modern
+binutils), we must also exclude sde_hw_rot.o from the display build.
+
+--- a/drivers/gpu/drm/msm/Makefile
++++ b/drivers/gpu/drm/msm/Makefile
+@@ -171,7 +171,6 @@ msm_drm-$(CONFIG_DRM_MSM_SDE) += \
+ 	sde/sde_hw_lm.o \
+ 	sde/sde_hw_ctl.o \
+ 	sde/sde_hw_util.o \
+ 	sde/sde_hw_sspp.o \
+ 	sde/sde_hw_wb.o \
+-	sde/sde_hw_rot.o \
+ 	sde/sde_hw_pingpong.o \
+ 	sde/sde_hw_top.o \
