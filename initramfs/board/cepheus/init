@@ -14,7 +14,12 @@ mount -t configfs none /sys/kernel/config 2>/dev/null
     done
     if [ -c /dev/fb0 ]; then
         sleep 5
-        busybox gzip -d -c /logo.gz | busybox dd of=/dev/fb0 bs=4096 2>/dev/null
+        for attr in bits_per_pixel virtual_size stride; do
+            echo "$attr=$(cat /sys/class/graphics/fb0/$attr 2>/dev/null)" >> /tmp/fb_diag.txt
+        done
+        busybox gunzip -c /logo.gz > /tmp/logo.raw
+        busybox dd if=/tmp/logo.raw of=/dev/fb0 bs=1048576 2>>/tmp/fb_diag.txt
+        rm /tmp/logo.raw
     fi
 ) &
 

@@ -1,7 +1,7 @@
 import math, gzip, base64
 
 W, H = 1080, 2340
-STRIDE = 4352          # actual GPU stride: 1088 pixels × 4 bytes
+STRIDE = 4320          # 1080 pixels × 4 bytes, no padding
 FBSZ = STRIDE * H     # 10,183,680 bytes
 
 # Background row: visible pixels + zero padding to stride
