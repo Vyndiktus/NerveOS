@@ -360,12 +360,33 @@ cpp -nostdinc -undef -D__DTS__ -x assembler-with-cpp \
 - Decompress to temp file first (`> /tmp/logo.raw`), then `dd` — eliminates pipe timing issues.
 - Do NOT redirect dd stderr to /dev/null during development — pipe to diag file instead.
 
-### Immediate next steps
+### Immediate next steps — rootfs build (session 7 prep)
 - [x] Permanently flash boot splash image: `boot_nerveos_v30.img` flashed to boot partition (session 7)
-- [ ] Build full NerveOS rootfs with hived, WireGuard, mDNS using the mainline 6.11 kernel
-- [ ] Port Buildroot config to use mainline kernel instead of vendor 4.14
+- [x] Naming cleanup: defconfig renamed to `NerveOS_cepheus_defconfig`, Makefile/build script updated
+- [x] `mdev -d &` added to init — fixes sda31 not appearing (UFS probes async, mdev -s is one-shot)
+- [x] DRM config options added to `kernel-nerveos-mainline.config`
+- [ ] **Run first Buildroot build** — clone Buildroot in WSL2, run `nerveos-build.sh`
+- [ ] **Verify rootfs boots** — sda31 pivot should now work with mdev daemon fix
 - [ ] Test WireGuard (`hive0` interface) on the device via USB serial
 - [ ] Test hived daemon startup over serial console
+
+### Rootfs build plan
+The Buildroot config (`NerveOS_cepheus_defconfig`) is ready. Build produces:
+- `rootfs.ext4` — flash to `/dev/sda31` via `fastboot flash userdata`
+- `Image` + `qcom/sm8150-xiaomi-cepheus.dtb` — use pre-built `kernel_v13.gz` for boot image (don't rebuild kernel via Buildroot unless needed)
+
+**To run the build in WSL2:**
+```bash
+wsl -d Debian -u root -- bash /mnt/c/Users/Forbidden\ User/HiveOS/nerveos-build.sh
+# Monitor: wsl -d Debian -u root -- tail -f /opt/NerveOS/build/cepheus/build.log
+```
+
+**sda31 partition:** On Mi 9, `/dev/sda31` = `userdata` partition (128GB - system). This is where the NerveOS rootfs lives. Flash with:
+```bash
+fastboot flash userdata /opt/NerveOS/build/cepheus/images/rootfs.ext4
+```
+
+**Known issue:** Buildroot will try to build the kernel from source (sm8150-mainline git). This takes a long time. If using the pre-built `kernel_v13.gz`, the kernel build can be skipped with `BR2_LINUX_KERNEL=n` override, but this requires a separate defconfig or override file.
 
 ### Future work (not started)
 - Design and implement the hive peer protocol (resource advertisement exchange)

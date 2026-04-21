@@ -2,3 +2,4 @@ build/
 buildroot/
 *.log
 null
+.claude/

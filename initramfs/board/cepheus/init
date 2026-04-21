@@ -3,6 +3,7 @@ mount -t proc none /proc
 mount -t sysfs none /sys
 mount -t devtmpfs none /dev 2>/dev/null
 /bin/mdev -s 2>/dev/null
+/bin/mdev -d &
 mount -t configfs none /sys/kernel/config 2>/dev/null
 
 # Boot logo: background job, writes to fb0 after USB gadget is bound
@@ -25,7 +26,7 @@ mount -t configfs none /sys/kernel/config 2>/dev/null
 
 /sbin/getty -n -l /bin/sh ttyMSM0 115200 vt100 &
 
-echo "HiveOS: waiting for UDC..."
+echo "NerveOS: waiting for UDC..."
 i=0
 while [ $i -lt 60 ]; do
   UDC=$(ls /sys/class/udc/ 2>/dev/null | head -1)
