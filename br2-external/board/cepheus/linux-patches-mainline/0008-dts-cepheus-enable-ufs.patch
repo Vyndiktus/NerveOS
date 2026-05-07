@@ -1,0 +1,66 @@
+--- a/arch/arm64/boot/dts/qcom/sm8150-xiaomi-cepheus.dts	2026-05-07 09:46:08.369851165 +0000
++++ b/arch/arm64/boot/dts/qcom/sm8150-xiaomi-cepheus.dts	2026-05-07 10:08:19.414631727 +0000
+@@ -687,3 +687,63 @@
+ 		max-speed = <3200000>;
+ 	};
+ };
++
++&ufs_mem_hc {
++	status = "okay";
++	vcc-supply = <&vreg_l10a_2p5>;
++	vcc-max-microamp = <750000>;
++	vccq-supply = <&vreg_l9a_1p2>;
++	vccq-max-microamp = <700000>;
++	vccq2-supply = <&vreg_s4a_1p8>;
++	vccq2-max-microamp = <750000>;
++};
++
++&ufs_mem_phy {
++	status = "okay";
++	vdda-phy-supply = <&vreg_l5a_0p875>;
++	vdda-phy-max-microamp = <90200>;
++	vdda-pll-supply = <&vreg_l3c_1p2>;
++	vdda-pll-max-microamp = <19000>;
++};
++
++&remoteproc_mpss {
++	status = "okay";
++	firmware-name = "qcom/sm8150/modem.mdt";
++
++	glink-edge {
++		qrtr_modem: qrtr-requests {
++			qcom,glink-channels = "IPCRTR";
++		};
++	};
++};
++
++&soc {
++	ipa: ipa@1e40000 {
++		compatible = "qcom,sm8150-ipa";
++		iommus = <&apps_smmu 0x720 0x0>,
++			 <&apps_smmu 0x722 0x0>;
++		reg = <0x0 0x01e40000 0x0 0x7000>,
++		      <0x0 0x01e47000 0x0 0x2000>,
++		      <0x0 0x01e04000 0x0 0x2c000>;
++		reg-names = "ipa-reg", "ipa-shared", "gsi";
++		interrupts-extended =
++			<&intc GIC_SPI 311 IRQ_TYPE_EDGE_RISING>,
++			<&intc GIC_SPI 432 IRQ_TYPE_LEVEL_HIGH>,
++			<&ipa_smp2p_in 0 IRQ_TYPE_EDGE_RISING>,
++			<&ipa_smp2p_in 1 IRQ_TYPE_EDGE_RISING>;
++		interrupt-names = "ipa", "gsi",
++				  "ipa-clock-query", "ipa-setup-ready";
++		clocks = <&rpmhcc RPMH_IPA_CLK>;
++		clock-names = "core";
++		interconnects =
++			<&aggre2_noc MASTER_IPA 0 &mc_virt SLAVE_EBI_CH0 0>,
++			<&gem_noc MASTER_AMPSS_M0 0 &config_noc SLAVE_IPA_CFG 0>;
++		interconnect-names = "memory", "config";
++		qcom,smem-states = <&ipa_smp2p_out 0>, <&ipa_smp2p_out 1>;
++		qcom,smem-state-names = "ipa-clock-enabled-valid",
++					"ipa-clock-enabled";
++		memory-region = <&ipa_fw_mem>;
++		qcom,gsi-loader = "modem";
++		status = "okay";
++	};
++};

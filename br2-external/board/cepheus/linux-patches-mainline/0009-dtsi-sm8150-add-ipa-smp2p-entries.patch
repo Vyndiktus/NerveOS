@@ -1,0 +1,29 @@
+--- a/arch/arm64/boot/dts/qcom/sm8150.dtsi	2026-05-07 10:08:19.386631727 +0000
++++ b/arch/arm64/boot/dts/qcom/sm8150.dtsi	2026-05-07 10:08:19.406631727 +0000
+@@ -848,7 +848,7 @@
+ 		};
+ 	};
+ 
+-	smp2p-mpss {
++	smp2p_modem: smp2p-mpss {
+ 		compatible = "qcom,smp2p";
+ 		qcom,smem = <435>, <428>;
+ 
+@@ -870,6 +870,17 @@
+ 			interrupt-controller;
+ 			#interrupt-cells = <2>;
+ 		};
++		ipa_smp2p_out: ipa-ap-to-modem {
++			qcom,entry-name = "ipa";
++			#qcom,smem-state-cells = <1>;
++		};
++
++		ipa_smp2p_in: ipa-modem-to-ap {
++			qcom,entry-name = "ipa";
++			interrupt-controller;
++			#interrupt-cells = <2>;
++		};
++
+ 	};
+ 
+ 	smp2p-slpi {
