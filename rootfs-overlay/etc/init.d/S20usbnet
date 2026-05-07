@@ -1,0 +1,104 @@
+#!/bin/sh
+# S20usbnet — add RNDIS USB Ethernet to the existing ACM gadget
+#
+# The initramfs creates an ACM-only gadget (g0) and binds it to the UDC.
+# This script temporarily detaches, adds an RNDIS function, then reattaches.
+# COM3 disconnects briefly during reconfiguration; it reconnects in ~2s.
+#
+# Windows side: RNDIS shows up as "Remote NDIS Compatible Device" — no driver
+# install needed.  Assign 192.168.42.2/24 or let busybox udhcpd assign it.
+#
+# Device IP: 192.168.42.1  (SSH via "ssh root@192.168.42.1")
+
+GADGET=/sys/kernel/config/usb_gadget/g0
+UDC=a600000.usb
+DEV_IP=192.168.42.1
+DEV_PREFIX=24
+
+case "$1" in
+start)
+    # Only run if gadget directory exists (USB gadget subsystem present)
+    if [ ! -d "$GADGET" ]; then
+        echo "usbnet: no gadget fs, skipping"
+        exit 0
+    fi
+
+    # Skip if RNDIS function already exists
+    if [ -d "$GADGET/functions/rndis.usb0" ]; then
+        echo "usbnet: RNDIS already configured"
+        ip link set usb0 up 2>/dev/null
+        ip addr add ${DEV_IP}/${DEV_PREFIX} dev usb0 2>/dev/null
+        "$0" dhcp
+        exit 0
+    fi
+
+    echo "usbnet: adding RNDIS to USB gadget..."
+
+    # Detach UDC (brief COM3 disconnect)
+    echo "" > "$GADGET/UDC" 2>/dev/null
+    sleep 0.5
+
+    # Create RNDIS function
+    mkdir -p "$GADGET/functions/rndis.usb0"
+    # Fixed MACs so Windows recognises the adapter each time
+    echo "42:00:de:ad:be:ef" > "$GADGET/functions/rndis.usb0/host_addr" 2>/dev/null
+    echo "42:00:de:ad:be:ee" > "$GADGET/functions/rndis.usb0/dev_addr"  2>/dev/null
+
+    # Add RNDIS to config c.1 (ACM already in there)
+    ln -sf "$GADGET/functions/rndis.usb0" "$GADGET/configs/c.1/rndis.usb0" 2>/dev/null
+
+    # Reattach UDC
+    echo "$UDC" > "$GADGET/UDC" 2>/dev/null
+    sleep 1
+
+    # usb0 appears after RNDIS is bound
+    for i in $(seq 1 10); do
+        ip link show usb0 > /dev/null 2>&1 && break
+        sleep 0.5
+    done
+
+    ip link set usb0 up 2>/dev/null
+    ip addr flush dev usb0 2>/dev/null
+    ip addr add ${DEV_IP}/${DEV_PREFIX} dev usb0 2>/dev/null
+    echo "usbnet: usb0 up at ${DEV_IP}/${DEV_PREFIX}"
+
+    "$0" dhcp
+    ;;
+
+dhcp)
+    # Start busybox udhcpd to assign 192.168.42.2 to the Windows host
+    if ! which udhcpd > /dev/null 2>&1; then
+        echo "usbnet: no udhcpd, set Windows IP to 192.168.42.2/24 manually"
+        exit 0
+    fi
+    mkdir -p /var/lib/misc
+    cat > /tmp/udhcpd.conf << 'EOF'
+start 192.168.42.2
+end   192.168.42.10
+interface usb0
+max_leases 4
+option subnet 255.255.255.0
+option router 192.168.42.1
+option dns 8.8.8.8
+option lease 3600
+EOF
+    udhcpd /tmp/udhcpd.conf 2>/dev/null &
+    echo "usbnet: DHCP server started on usb0"
+    ;;
+
+stop)
+    kill $(pidof udhcpd) 2>/dev/null
+    ;;
+
+restart|reload)
+    "$0" stop
+    sleep 1
+    "$0" start
+    ;;
+*)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+    ;;
+esac
+
+exit 0

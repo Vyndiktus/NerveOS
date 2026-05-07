@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
 	"os"
 
 	"github.com/BurntSushi/toml"
+	"NerveOS/hived/internal/brain"
 	"NerveOS/hived/internal/mesh"
 	"NerveOS/hived/internal/resources"
 )
@@ -15,6 +17,7 @@ type Config struct {
 	Node      NodeConfig       `toml:"node"`
 	Mesh      mesh.Config      `toml:"mesh"`
 	Resources resources.Config `toml:"resources"`
+	Brain     brain.Config     `toml:"brain"`
 	Security  SecurityConfig   `toml:"security"`
 }
 
@@ -72,14 +75,14 @@ func (cfg *Config) ensureIdentity(cfgPath string) error {
 	cfg.Node.ID = hex.EncodeToString(b)
 	fmt.Printf("hived: generated node ID: %s\n", cfg.Node.ID)
 
-	// Append the id to the config file so it survives reboots.
-	f, err := os.OpenFile(cfgPath, os.O_APPEND|os.O_WRONLY, 0o640)
-	if err != nil {
-		// Config may be read-only in early boot; just warn.
-		fmt.Printf("hived: warning: could not persist node ID: %v\n", err)
+	// Rewrite the config file so the generated ID persists across reboots.
+	var buf bytes.Buffer
+	if err := toml.NewEncoder(&buf).Encode(cfg); err != nil {
+		fmt.Printf("hived: warning: could not encode config: %v\n", err)
 		return nil
 	}
-	defer f.Close()
-	_, _ = fmt.Fprintf(f, "\n# written by hived on first boot\n[node]\nid = %q\n", cfg.Node.ID)
+	if err := os.WriteFile(cfgPath, buf.Bytes(), 0o640); err != nil {
+		fmt.Printf("hived: warning: could not persist node ID: %v\n", err)
+	}
 	return nil
 }

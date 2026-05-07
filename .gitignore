@@ -2,4 +2,9 @@ build/
 buildroot/
 *.log
 null
+state
+APKINDEX
+*.apk
+hived/hived-arm64
+hived/hived
 .claude/

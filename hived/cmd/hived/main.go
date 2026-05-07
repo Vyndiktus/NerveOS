@@ -7,10 +7,12 @@ import (
 	"os/signal"
 	"syscall"
 
+	"NerveOS/hived/internal/brain"
 	"NerveOS/hived/internal/discovery"
 	"NerveOS/hived/internal/mesh"
 	"NerveOS/hived/internal/resources"
 )
+
 
 func main() {
 	configPath := flag.String("config", "/etc/hive/hived.conf", "Path to hived config file")
@@ -45,8 +47,14 @@ func main() {
 		log.Fatalf("hived: discovery init: %v", err)
 	}
 
+	brainMgr, err := brain.New(cfg.Brain)
+	if err != nil {
+		log.Fatalf("hived: brain init: %v", err)
+	}
+
 	// Start in order: mesh first (creates WG interface + loads keys),
-	// then resources, then discovery (needs mesh public key to be ready).
+	// then resources, then discovery (needs mesh public key to be ready),
+	// then brain (no dependencies, but start last so system is stable).
 	if err := meshMgr.Start(); err != nil {
 		log.Fatalf("hived: mesh start: %v", err)
 	}
@@ -55,6 +63,9 @@ func main() {
 	}
 	if err := discMgr.Start(); err != nil {
 		log.Fatalf("hived: discovery start: %v", err)
+	}
+	if err := brainMgr.Start(); err != nil {
+		log.Fatalf("hived: brain start: %v", err)
 	}
 
 	log.Printf("hived running — wg-port=%d hive-ip=%s discovery=%s",
@@ -71,6 +82,7 @@ func main() {
 	<-sig
 
 	log.Println("hived shutting down...")
+	brainMgr.Stop()
 	discMgr.Stop()
 	resMgr.Stop()
 	meshMgr.Stop()

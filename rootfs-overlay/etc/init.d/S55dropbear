@@ -1,0 +1,33 @@
+#!/bin/sh
+# S55dropbear — SSH server for development access over USB ethernet
+DROPBEAR=/usr/sbin/dropbear
+PIDFILE=/var/run/dropbear.pid
+KEYDIR=/etc/dropbear
+
+start() {
+    [ -x "$DROPBEAR" ] || return 0
+
+    mkdir -p "$KEYDIR"
+    [ -f $KEYDIR/dropbear_ed25519_host_key ] || \
+        dropbearkey -t ed25519 -f $KEYDIR/dropbear_ed25519_host_key >/dev/null 2>&1
+    [ -f $KEYDIR/dropbear_rsa_host_key ] || \
+        dropbearkey -t rsa -s 2048 -f $KEYDIR/dropbear_rsa_host_key >/dev/null 2>&1
+
+    echo "Starting dropbear SSH..."
+    start-stop-daemon -S -b -m -p "$PIDFILE" \
+        --exec "$DROPBEAR" -- -p 22 -R
+    echo "done."
+}
+
+stop() {
+    echo "Stopping dropbear..."
+    start-stop-daemon -K -p "$PIDFILE" -s TERM -o
+    rm -f "$PIDFILE"
+}
+
+case "$1" in
+    start)   start ;;
+    stop)    stop  ;;
+    restart) stop; sleep 1; start ;;
+    *) echo "Usage: $0 {start|stop|restart}"; exit 1 ;;
+esac

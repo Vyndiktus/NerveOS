@@ -1,0 +1,33 @@
+#!/bin/sh
+# S45qrfs — Qualcomm Remote File System Access server
+# Serves firmware files to the modem's wlan_pd via QMI RFSA (svc 0x28)
+# Runs after qrtr/modprobe (S11) and before modem start (S50)
+
+DAEMON=/usr/bin/qrfs
+LOGFILE=/var/log/qrfs.log
+
+case "$1" in
+start)
+    if [ ! -x "$DAEMON" ]; then
+        echo "qrfs: $DAEMON not found, skipping"
+        exit 0
+    fi
+    echo "Starting RFSA server..."
+    $DAEMON >> $LOGFILE 2>&1 &
+    echo $! > /var/run/qrfs.pid
+    ;;
+stop)
+    [ -f /var/run/qrfs.pid ] && kill $(cat /var/run/qrfs.pid) 2>/dev/null
+    ;;
+restart|reload)
+    "$0" stop
+    sleep 1
+    "$0" start
+    ;;
+*)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+    ;;
+esac
+
+exit 0

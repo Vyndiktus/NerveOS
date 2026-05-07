@@ -1,0 +1,76 @@
+#!/bin/sh
+# S11modprobe — load kernel modules needed for hive networking and modem stack
+# Runs after udev (S10) so devices are present, before network (S40)
+
+KVER=$(uname -r)
+MODDIR="/lib/modules/$KVER"
+
+# If the module directory doesn't exactly match uname -r, look for a close
+# match (handles LOCALVERSION_AUTO version string drift between kernel and
+# Buildroot modules).
+if [ ! -d "$MODDIR" ]; then
+    for d in /lib/modules/6.11.0-sm8150*; do
+        [ -d "$d" ] && MODDIR="$d" && break
+    done
+fi
+
+# Load a module by filename — tries MODDIR/name.ko and MODDIR/kernel/***/name.ko
+insmod_q() {
+    local name="$1"
+    local ko
+    # Try flat path first (gebc3d directory style)
+    ko="${MODDIR}/${name}.ko"
+    [ -f "$ko" ] && { insmod "$ko" 2>/dev/null && echo "  $name OK" || true; return; }
+    # Try nested path (Buildroot kernel style)
+    ko=$(find "$MODDIR" -name "${name}.ko" 2>/dev/null | head -1)
+    [ -f "$ko" ] && { insmod "$ko" 2>/dev/null && echo "  $name OK" || true; return; }
+    echo "  $name: not found in $MODDIR"
+}
+
+case "$1" in
+start)
+    echo "Loading kernel modules..."
+
+    # WireGuard — hive mesh tunnel
+    insmod_q wireguard || true
+
+    # QRTR — modem inter-processor messaging (load in dependency order)
+    insmod_q qrtr
+    insmod_q qrtr-smd
+    insmod_q qrtr_smd
+
+    # Qualcomm modem support modules
+    insmod_q qcom_glink_smem
+    insmod_q qcom_pil_info
+    insmod_q qcom_sysmon
+    insmod_q qcom_pd_mapper
+    insmod_q qcom_common
+    insmod_q qcom_q6v5
+    insmod_q ipa
+    insmod_q qcom_q6v5_pas
+
+    # WiFi stack — ath10k_snoc for WCN3990 (load in dependency order)
+    insmod_q rfkill
+    insmod_q cfg80211
+    insmod_q libarc4
+    insmod_q mac80211
+    insmod_q ath
+    insmod_q ath10k_core
+    insmod_q ath10k_snoc
+
+    # Give QRTR a moment to enumerate before modem is started
+    sleep 1
+    ;;
+stop)
+    ;;
+restart|reload)
+    "$0" stop
+    "$0" start
+    ;;
+*)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+    ;;
+esac
+
+exit 0

@@ -1,0 +1,36 @@
+#!/bin/sh
+# S50modem — start Qualcomm modem (MPSS) remoteproc
+# Runs after qrfs (S45) so the RFSA server is ready to serve firmware requests
+# The modem's wlan_pd needs RFSA to load wlanmdsp.mbn for WCN3990
+
+REMOTEPROC=/sys/class/remoteproc/remoteproc0
+
+case "$1" in
+start)
+    if [ ! -d "$REMOTEPROC" ]; then
+        echo "modem: remoteproc0 not found, skipping"
+        exit 0
+    fi
+    STATE=$(cat "$REMOTEPROC/state" 2>/dev/null)
+    if [ "$STATE" = "running" ]; then
+        echo "modem: already running"
+        exit 0
+    fi
+    echo "Starting modem remoteproc..."
+    echo start > "$REMOTEPROC/state" 2>/dev/null && echo "  modem start OK" || echo "  modem start failed"
+    ;;
+stop)
+    [ -d "$REMOTEPROC" ] && echo stop > "$REMOTEPROC/state" 2>/dev/null
+    ;;
+restart|reload)
+    "$0" stop
+    sleep 2
+    "$0" start
+    ;;
+*)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+    ;;
+esac
+
+exit 0

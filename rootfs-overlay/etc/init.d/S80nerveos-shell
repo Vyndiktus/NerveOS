@@ -1,0 +1,52 @@
+#!/bin/sh
+# S80nerveos-shell — NerveOS Wayland compositor
+
+DAEMON=/usr/bin/nerveos-shell
+PIDFILE=/var/run/nerveos-shell.pid
+LOGFILE=/var/log/nerveos-shell.log
+RUNTIME=/run/nerveos
+
+# wlroots environment
+# WLR_RENDERER=pixman — CPU rendering, no Mesa required, reliable on first boot
+# Switch to gles2 once Mesa/freedreno is confirmed working
+export XDG_RUNTIME_DIR=$RUNTIME
+export WLR_SESSION=direct
+export WLR_BACKENDS=drm,libinput
+export WLR_DRM_DEVICES=/dev/dri/card0
+export WLR_RENDERER=pixman
+export WLR_NO_HARDWARE_CURSORS=1
+export LIBSEAT_BACKEND=noop
+
+start() {
+    [ -x "$DAEMON" ] || { echo "nerveos-shell: not installed"; exit 1; }
+
+    # Wait up to 10s for DRM device
+    i=0
+    while [ ! -c /dev/dri/card0 ] && [ $i -lt 30 ]; do
+        sleep 1
+        i=$((i + 1))
+    done
+    [ -c /dev/dri/card0 ] || { echo "nerveos-shell: /dev/dri/card0 not found"; exit 1; }
+
+    mkdir -p "$RUNTIME"
+    chmod 0700 "$RUNTIME"
+
+    echo "Starting nerveos-shell..."
+    start-stop-daemon -S -b -m -p "$PIDFILE" \
+        --exec "$DAEMON" -- >> "$LOGFILE" 2>&1
+    echo "done."
+}
+
+stop() {
+    echo "Stopping nerveos-shell..."
+    start-stop-daemon -K -p "$PIDFILE" -s TERM -o
+    rm -f "$PIDFILE"
+    echo "done."
+}
+
+case "$1" in
+    start)   start ;;
+    stop)    stop  ;;
+    restart) stop; sleep 1; start ;;
+    *) echo "Usage: $0 {start|stop|restart}"; exit 1 ;;
+esac

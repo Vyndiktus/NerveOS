@@ -1,3 +1,5 @@
+//go:build linux
+
 // Package resources advertises and brokers CPU, RAM, and storage to the hive.
 package resources
 
