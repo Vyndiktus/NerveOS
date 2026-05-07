@@ -20,7 +20,7 @@ LOG=$BUILD/build.log
 # Re-create bind mount if it was lost (WSL2 restart)
 if [ ! -f $SRC/Makefile ]; then
     mkdir -p $SRC
-    mount --bind '/mnt/c/Users/Forbidden User/NerveOS' $SRC
+    mount --bind '/mnt/c/Users/Forbidden User/HiveOS' $SRC
 fi
 
 mkdir -p $BUILD

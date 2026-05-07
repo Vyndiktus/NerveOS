@@ -24,8 +24,8 @@ BR2_LINUX_KERNEL_NEEDS_HOST_OPENSSL=y
 BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="$(BR2_EXTERNAL_NERVEOS_PATH)/board/cepheus/kernel-nerveos-mainline.config"
 
 # ── System ───────────────────────────────────────────────────────
-BR2_TARGET_GENERIC_HOSTNAME="NerveOS"
-BR2_TARGET_GENERIC_ISSUE="NerveOS 0.1 — The Hive Awakens"
+BR2_TARGET_GENERIC_HOSTNAME="nerveos"
+BR2_TARGET_GENERIC_ISSUE="NerveOS 0.1"
 BR2_INIT_SYSV=y
 BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_EUDEV=y
 
@@ -38,79 +38,40 @@ BR2_TARGET_ROOTFS_EXT2_SIZE="2048M"
 BR2_ROOTFS_OVERLAY="$(BR2_EXTERNAL_NERVEOS_PATH)/../rootfs-overlay"
 BR2_ROOTFS_POST_BUILD_SCRIPT="$(BR2_EXTERNAL_NERVEOS_PATH)/board/cepheus/post-build.sh"
 
-# ── Networking ───────────────────────────────────────────────────
-BR2_PACKAGE_WIREGUARD_TOOLS=y
-BR2_PACKAGE_OPENSSL=y
-BR2_PACKAGE_DHCPCD=y
-BR2_PACKAGE_WPA_SUPPLICANT=y
-BR2_PACKAGE_WPA_SUPPLICANT_WIFI_DISPLAY=y
-BR2_PACKAGE_IW=y
-BR2_PACKAGE_IPTABLES=y
-
-# ── BATMAN-adv mesh (Haven transport layer) ───────────────────────
-BR2_PACKAGE_BATCTL=y
-
-# ── Python 3 — required for Reticulum ────────────────────────────
-BR2_PACKAGE_PYTHON3=y
-BR2_PACKAGE_PYTHON_CRYPTOGRAPHY=y
-BR2_PACKAGE_PYTHON_SERIAL=y
-
-# ── Reticulum (RNS) — encrypted multi-radio overlay ──────────────
-BR2_PACKAGE_PYTHON_RNS=y
-
-# ── WiFi firmware (ath10k WCN3990) ───────────────────────────────
-BR2_PACKAGE_LINUX_FIRMWARE=y
-BR2_PACKAGE_LINUX_FIRMWARE_ATHEROS_ATH10K=y
-
-# ── Bluetooth userspace ───────────────────────────────────────────
-BR2_PACKAGE_BLUEZ5_UTILS=y
-BR2_PACKAGE_BLUEZ5_UTILS_TOOLS=y
-
 # ── Base system ──────────────────────────────────────────────────
 BR2_PACKAGE_BUSYBOX=y
 BR2_PACKAGE_E2FSPROGS=y
 BR2_PACKAGE_UTIL_LINUX=y
 BR2_PACKAGE_DROPBEAR=y
 
-# ── NerveOS daemon ────────────────────────────────────────────────
+# ── Networking ───────────────────────────────────────────────────
+BR2_PACKAGE_WIREGUARD_TOOLS=y
+BR2_PACKAGE_OPENSSL=y
+BR2_PACKAGE_DHCPCD=y
+BR2_PACKAGE_WPA_SUPPLICANT=y
+BR2_PACKAGE_IW=y
+BR2_PACKAGE_NFTABLES=y
+BR2_PACKAGE_IPROUTE2=y
+
+# ── BATMAN-adv mesh transport ────────────────────────────────────
+BR2_PACKAGE_BATCTL=y
+
+# ── Bluetooth ────────────────────────────────────────────────────
+BR2_PACKAGE_BLUEZ5_UTILS=y
+BR2_PACKAGE_BLUEZ5_UTILS_TOOLS=y
+
+# ── WiFi firmware (ath10k WCN3990) ───────────────────────────────
+BR2_PACKAGE_LINUX_FIRMWARE=y
+BR2_PACKAGE_LINUX_FIRMWARE_ATHEROS_ATH10K=y
+
+# ── Python 3 — Reticulum transport ───────────────────────────────
+BR2_PACKAGE_PYTHON3=y
+BR2_PACKAGE_PYTHON_CRYPTOGRAPHY=y
+BR2_PACKAGE_PYTHON_SERIAL=y
+BR2_PACKAGE_PYTHON_RNS=y
+
+# ── NerveOS daemon ───────────────────────────────────────────────
 BR2_PACKAGE_NERVED=y
-
-# ── Display stack ─────────────────────────────────────────────────
-# Mesa dependencies
-BR2_PACKAGE_LIBDRM=y
-BR2_PACKAGE_EXPAT=y
-
-# Mesa with freedreno driver for Adreno 640 GPU (SM8150)
-BR2_PACKAGE_MESA3D=y
-BR2_PACKAGE_MESA3D_GALLIUM_DRIVER_FREEDRENO=y
-BR2_PACKAGE_MESA3D_OPENGL_EGL=y
-BR2_PACKAGE_MESA3D_OPENGL_ES=y
-BR2_PACKAGE_MESA3D_DRI3=y
-
-# Wayland core + protocols
-BR2_PACKAGE_WAYLAND=y
-BR2_PACKAGE_WAYLAND_PROTOCOLS=y
-
-# Input handling (touch, USB HID, keyboard, mouse)
-BR2_PACKAGE_LIBINPUT=y
-
-# Keyboard layout (xkb)
-BR2_PACKAGE_LIBXKBCOMMON=y
-BR2_PACKAGE_XKEYBOARD_CONFIG=y
-
-# Compositor library
-BR2_PACKAGE_WLROOTS=y
-
-# 2D drawing for taskbar text + decorations
-BR2_PACKAGE_CAIRO=y
-BR2_PACKAGE_PANGO=y
-
-# Display manager font
-BR2_PACKAGE_FONTCONFIG=y
-BR2_PACKAGE_DEJAVU=y
-
-# NerveOS shell (compositor + WinCE-style phone UI)
-BR2_PACKAGE_NERVEOS_SHELL=y
 
 # ── Host tools ───────────────────────────────────────────────────
 BR2_PACKAGE_HOST_GO=y
