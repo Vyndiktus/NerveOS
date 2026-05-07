@@ -10,3 +10,4 @@ hived/hived
 tools/qrfs
 tools/test_qrtr
 .dev/
+.claude/
