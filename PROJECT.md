@@ -1,6 +1,6 @@
 # NerveOS — Project Intelligence Document
 
-This file is automatically loaded by Claude Code. Keep it updated after every significant session.
+Project intelligence document — keep updated after every significant development session.
 Last updated: 2026-05-04 (session 24 — Audio deep debug; WCD9340 EAR+LINEOUT PAs working; speaker needs QUAT MI2S + CS35L41 driver)
 
 ---
@@ -27,7 +27,7 @@ NerveOS is a custom Linux-based operating system — not Android, not a distro f
 
 ```
 NerveOS/                              ← project root (C:\Users\Forbidden User\NerveOS\)
-├── CLAUDE.md                        ← you are here
+├── PROJECT.md                       ← you are here
 ├── Makefile                         ← top-level orchestration
 ├── devices/                         ← device profiles (one YAML per device)
 │   └── cepheus.yaml                 ← Xiaomi Mi 9
@@ -953,7 +953,7 @@ fastboot flash userdata /opt/NerveOS/build/cepheus/images/rootfs.ext4
 
 ## User Preferences & Working Style
 
-- User makes high-level decisions; delegates all technical choices to Claude
+- User makes high-level decisions; technical implementation handled in-house
 - Prefers working, scaffolded code over explanations
 - Wants detailed self-documentation maintained so sessions don't repeat context
 - First physical device: Xiaomi Mi 9 (cepheus)
