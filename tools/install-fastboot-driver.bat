@@ -1,5 +1,5 @@
 @echo off
-:: HiveOS — Install Android fastboot USB driver (WinUSB for VID_18D1&PID_D00D)
+:: NerveOS — Install Android fastboot USB driver (WinUSB for VID_18D1&PID_D00D)
 :: Self-elevates if not already admin
 
 net session >nul 2>&1
@@ -12,7 +12,7 @@ if %ERRORLEVEL% NEQ 0 (
 cd /d "%~dp0"
 echo.
 echo ============================================================
-echo  HiveOS Fastboot USB Driver Installer
+echo  NerveOS Fastboot USB Driver Installer
 echo ============================================================
 echo  INF: %~dp0fastboot-driver\android_winusb.inf
 echo.

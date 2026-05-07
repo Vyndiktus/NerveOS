@@ -10,7 +10,7 @@ echo "[NerveOS] Post-build: cepheus"
 
 # Install default hive config if not present
 if [ ! -f "$TARGET_DIR/etc/nerve/nerved.conf" ]; then
-    mkdir -p "$TARGET_DIR/etc/hive"
+    mkdir -p "$TARGET_DIR/etc/nerve"
     cp "$BOARD_DIR/nerved.conf.default" "$TARGET_DIR/etc/nerve/nerved.conf"
 fi
 

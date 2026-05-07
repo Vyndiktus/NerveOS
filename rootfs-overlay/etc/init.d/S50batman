@@ -1,13 +1,13 @@
 #!/bin/sh
-# S50batman — HiveOS BATMAN-adv mesh transport setup
-# Runs before hived (S99) and Reticulum (S60).
+# S50batman — NerveOS BATMAN-adv mesh transport setup
+# Runs before nerved (S99) and Reticulum (S60).
 #
 # Sets up an 802.11s mesh point on every wireless interface that isn't
 # already in use, then adds it to the batman-adv bat0 virtual interface.
 # bat0 becomes the unified L2 mesh backbone — all traffic above it
 # (mDNS, WireGuard, DHCP) works transparently across multiple hops.
 
-MESH_SSID="hiveos-mesh"
+MESH_SSID="nerveos-mesh"
 MESH_FREQ="2412"        # 2.4GHz ch1 default; HaLow nodes override in udev
 MESH_IFACE="bat0"
 BATMAN_MOD="batman_adv"
@@ -42,7 +42,7 @@ start)
         }
         ip link set "$IFACE" up
 
-        # Join the HiveOS mesh cell
+        # Join the NerveOS mesh cell
         iw dev "$IFACE" mesh join "$MESH_SSID" freq "$MESH_FREQ" 2>/dev/null || {
             log "WARNING: $IFACE could not join mesh $MESH_SSID"
             continue

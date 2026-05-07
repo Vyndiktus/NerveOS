@@ -20,8 +20,8 @@ ls $MNT/etc/init.d/ 2>/dev/null
 echo "=== /usr/bin/nerve CLI ==="
 file $MNT/usr/bin/nerve 2>/dev/null || echo "No hive CLI"
 
-echo "=== /etc/hive ==="
-ls $MNT/etc/nerve/ 2>/dev/null || echo "No /etc/hive"
+echo "=== /etc/nerve ==="
+ls $MNT/etc/nerve/ 2>/dev/null || echo "No /etc/nerve"
 
 echo "=== /sbin/mdev or udev ==="
 ls -la $MNT/sbin/mdev 2>/dev/null || echo "No mdev"

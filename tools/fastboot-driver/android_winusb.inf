@@ -26,5 +26,5 @@ AddReg = Dev_AddReg
 HKR,,DeviceInterfaceGUIDs,0x10000,"{F72FE0D4-CBCB-407d-8814-9ED673D0DD6B}"
 
 [Strings]
-ProviderName              = "HiveOS"
+ProviderName              = "NerveOS"
 SingleBootLoaderInterface = "Android Bootloader Interface"
