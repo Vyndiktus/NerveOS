@@ -4,7 +4,7 @@
 results = []
 
 # 1. Remove from ufs-qcom.c advertise_quirks
-path1 = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
+path1 = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
 with open(path1, 'r') as f:
     c1 = f.read()
 
@@ -23,7 +23,7 @@ with open(path1, 'w') as f:
     f.write(c1)
 
 # 2. Remove HIBERNATE_BEFORE_HCE block from ufshcd_hba_enable in ufshcd.c
-path2 = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/core/ufshcd.c'
+path2 = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/core/ufshcd.c'
 with open(path2, 'r') as f:
     c2 = f.read()
 

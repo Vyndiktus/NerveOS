@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Revert the skip_power_up_once changes - crashes device."""
 
-c_path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
-h_path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.h'
+c_path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
+h_path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.h'
 
 # Revert PRE_CHANGE handler
 with open(c_path, 'rb') as f:

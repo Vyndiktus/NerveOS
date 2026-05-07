@@ -38,17 +38,17 @@ NerveOS/                              ← project root (C:\Users\Forbidden User\
 │   ├── board/
 │   │   └── cepheus/
 │   │       ├── post-build.sh        ← runs after rootfs assembly
-│   │       └── hived.conf.default   ← default config copied to /etc/hive/hived.conf
+│   │       └── nerved.conf.default   ← default config copied to /etc/nerve/nerved.conf
 │   ├── configs/
 │   │   └── NerveOS_cepheus_defconfig ← Buildroot config for Mi 9
 │   └── package/
-│       └── hived/                   ← Buildroot package definition for hived
+│       └── nerved/                   ← Buildroot package definition for nerved
 │           ├── Config.in
-│           ├── hived.mk
-│           └── hived.init           ← SysV init script → /etc/init.d/S99hived
-├── hived/                           ← Hive daemon (Go)
-│   ├── go.mod                       ← module: NerveOS/hived
-│   ├── cmd/hived/
+│           ├── nerved.mk
+│           └── nerved.init           ← SysV init script → /etc/init.d/S99nerved
+├── nerved/                           ← Hive daemon (Go)
+│   ├── go.mod                       ← module: NerveOS/nerved
+│   ├── cmd/nerved/
 │   │   ├── main.go                  ← entry point, wires up subsystems
 │   │   └── config.go                ← TOML config loading, node identity
 │   └── internal/
@@ -56,10 +56,10 @@ NerveOS/                              ← project root (C:\Users\Forbidden User\
 │       ├── discovery/discovery.go   ← mDNS (local) + DHT (internet) peer discovery
 │       └── resources/resources.go  ← CPU/RAM/storage advertisement + brokering
 ├── tools/
-│   ├── hive-identify.py             ← USB device identifier (fastboot + adb)
-│   └── hive-flash.py                ← Image flasher via fastboot
+│   ├── nerve-identify.py             ← USB device identifier (fastboot + adb)
+│   └── nerve-flash.py                ← Image flasher via fastboot
 ├── rootfs-overlay/                  ← Files dropped into every device's rootfs
-│   ├── etc/hive/                    ← Runtime config dir (keys, certs, hived.conf)
+│   ├── etc/hive/                    ← Runtime config dir (keys, certs, nerved.conf)
 │   └── usr/bin/hive                 ← User-facing CLI shim
 ├── docs/
 │   └── unlock-cepheus.md            ← Mi 9 bootloader unlock guide
@@ -94,31 +94,31 @@ NerveOS/                              ← project root (C:\Users\Forbidden User\
 - **Status:** Profile written, defconfig written, not yet built or flashed
 - **Unlock guide:** `docs/unlock-cepheus.md`
 - **Flash command:** `make flash DEVICE=cepheus`
-- **USB detection:** `python tools/hive-identify.py`
+- **USB detection:** `python tools/nerve-identify.py`
 
 **Firmware blobs required (proprietary, not in repo):**
 - Extract from stock MIUI ROM: `lib/firmware/qcom/sm8150/`, `lib/firmware/wlan/qca_cld3/`
 
 ---
 
-## hived Architecture
+## nerved Architecture
 
 ```
-hived (PID 1 or init.d S99)
-├── mesh.Manager        — owns WireGuard interface "hive0", peer add/remove
+nerved (PID 1 or init.d S99)
+├── mesh.Manager        — owns WireGuard interface "nerve0", peer add/remove
 ├── discovery.Manager   — mDNS announcer/scanner + DHT announcer/lookup
 │                         → calls mesh.Manager.AddPeer() when new peers found
 └── resources.Manager   — samples CPU/RAM/storage every 10s
                           → broadcasts Advertisement to peers (future: via hive protocol)
 ```
 
-**WireGuard interface:** `hive0`, listen port `51820`
-**Config location on device:** `/etc/hive/hived.conf`
-**Key location on device:** `/etc/hive/wg-private.key` (generated on first boot)
+**WireGuard interface:** `nerve0`, listen port `51820`
+**Config location on device:** `/etc/nerve/nerved.conf`
+**Key location on device:** `/etc/nerve/wg-private.key` (generated on first boot)
 
 ### What's implemented (as of 2026-04-18)
-- **`mesh/keys.go`**: WireGuard keypair generation via `wg genkey/pubkey`, persisted to `/etc/hive/wg-private.key`
-- **`mesh/hiveip.go`**: Deterministic hive IP (`10.42.x.x`) derived from first 2 bytes of node ID
+- **`mesh/keys.go`**: WireGuard keypair generation via `wg genkey/pubkey`, persisted to `/etc/nerve/wg-private.key`
+- **`mesh/nerveip.go`**: Deterministic hive IP (`10.42.x.x`) derived from first 2 bytes of node ID
 - **`mesh/mesh.go`**: Full WireGuard interface lifecycle — key loading, IP assignment, peer add/remove with route injection
 - **`discovery/discovery.go`**: Real mDNS via `github.com/grandcat/zeroconf` — announces node (pubkey, hive IP, WG port in TXT), browses for peers every 30s, adds discovered peers to mesh. Static peer bootstrap via `pubkey@host:port` config entries.
 - **`resources/resources.go`**: Real `/proc/meminfo` RAM sampling, `/proc/stat` CPU delta sampling, `syscall.Statfs` storage sampling — all with configurable reserves applied
@@ -195,13 +195,13 @@ make DEVICE=cepheus         # Full build (takes 1-2 hours first time)
 make flash DEVICE=cepheus   # Flash to connected device
 make identify               # Identify USB-connected devices
 make identify-watch         # Watch for device connections continuously
-make hived                  # Build hived natively (for testing)
-make hived-arm64            # Cross-compile hived for ARM64
+make nerved                  # Build nerved natively (for testing)
+make nerved-arm64            # Cross-compile nerved for ARM64
 ```
 
 ### Adding a new device
 1. Create `devices/<codename>.yaml` (copy cepheus.yaml as template)
-2. Create `br2-external/board/<codename>/` with `post-build.sh` and `hived.conf.default`
+2. Create `br2-external/board/<codename>/` with `post-build.sh` and `nerved.conf.default`
 3. Create `br2-external/configs/NerveOS_<codename>_defconfig`
 4. Run `make DEVICE=<codename>`
 
@@ -249,15 +249,15 @@ When Buildroot stops mid-kernel-build and you need to apply a fix:
 - [x] Full project scaffold and directory structure
 - [x] cepheus device profile (`devices/cepheus.yaml`)
 - [x] Buildroot external tree (`br2-external/`)
-- [x] Buildroot defconfig for cepheus (ARM64, WireGuard, Go, hived)
-- [x] `hive-identify.py` — USB identification tool
-- [x] `hive-flash.py` — Fastboot flasher with safety checks
-- [x] `hived` Go daemon skeleton (mesh, discovery, resources)
+- [x] Buildroot defconfig for cepheus (ARM64, WireGuard, Go, nerved)
+- [x] `nerve-identify.py` — USB identification tool
+- [x] `nerve-flash.py` — Fastboot flasher with safety checks
+- [x] `nerved` Go daemon skeleton (mesh, discovery, resources)
 - [x] `hive` CLI shim in rootfs overlay
 - [x] Bootloader unlock documentation for cepheus
 - [x] **Bootloader unlocked** on physical Mi 9
 - [x] **Kernel builds successfully** — vmlinux linked, Image.gz generated (session 2)
-- [x] NerveOS-dev-01 LXC container on Proxmox — hived tested and running
+- [x] NerveOS-dev-01 LXC container on Proxmox — nerved tested and running
 - [x] Proxmox API token configured
 
 ### Mainline kernel boot — session 3 (2026-04-19)
@@ -392,7 +392,7 @@ cpp -nostdinc -undef -D__DTS__ -x assembler-with-cpp \
 - BATMAN_ADV: changed from `=m` to `=y` (built-in)
 - Kernel rebuild running via screen session `nerveos-kernel` in WSL2 (started 2026-04-22 05:46)
 
-**hived.conf duplicate key fix (`hived/cmd/hived/config.go`):**
+**nerved.conf duplicate key fix (`nerved/cmd/nerved/config.go`):**
 - Bug: `ensureIdentity()` appended a new `[node]` section via `O_APPEND`, causing TOML parse error on second boot
 - Fix: rewrites the entire config file via `toml.NewEncoder` + `os.WriteFile` — atomic replacement, no duplication
 
@@ -403,7 +403,7 @@ cpp -nostdinc -undef -D__DTS__ -x assembler-with-cpp \
 
 **Buildroot linux-configure with spaces in path:**
 - WSL PATH contains Windows paths with spaces, breaking `make` variable passing
-- Fix 1: symlink `/opt/NerveOS-br2-ext` → `/mnt/c/Users/Forbidden User/HiveOS/br2-external`
+- Fix 1: symlink `/opt/NerveOS-br2-ext` → `/mnt/c/Users/Forbidden User/NerveOS/br2-external`
 - Fix 2: clean PATH to `/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin` before running make
 - Invoke: `make -C /opt/NerveOS-project/buildroot BR2_EXTERNAL=/opt/NerveOS-br2-ext O=/opt/NerveOS/build/cepheus linux-configure`
 
@@ -484,15 +484,15 @@ cpp -nostdinc -undef -D__DTS__ -x assembler-with-cpp \
 - [x] Permanently flash boot splash image: `boot_nerveos_v30.img` flashed to boot partition (session 7)
 - [x] Buildroot rootfs built successfully (session 8)
 - [x] Added CONFIG_EFI=n to kernel config fragment (session 9)
-- [x] Fixed hived.conf duplicate key bug in config.go (session 9)
+- [x] Fixed nerved.conf duplicate key bug in config.go (session 9)
 - [x] Fixed inittab runlevels for real sysvinit (session 9)
 - [x] Kernel rebuild running in screen session `nerveos-kernel` (session 9)
 - [x] Kernel rebuild complete — `6.11.0-sm8150` with EFI=n, BATMAN_ADV=y, WireGuard=m
-- [x] rootfs.ext4 rebuilt with fixed hived, inittab, and boot splash script
+- [x] rootfs.ext4 rebuilt with fixed nerved, inittab, and boot splash script
 - [x] v37 boot image flashed + rootfs.ext4 flashed — permanently boots NerveOS Buildroot rootfs
 - [x] UFS working — 31 partitions visible on `/dev/sda`
-- [x] WireGuard working — `modprobe wireguard` → `hive0` UP at `10.42.x.x/16`
-- [x] hived running — PID ~337, stable node ID persists across reboots, correct single `[node]` section
+- [x] WireGuard working — `modprobe wireguard` → `nerve0` UP at `10.42.x.x/16`
+- [x] nerved running — PID ~337, stable node ID persists across reboots, correct single `[node]` section
 - [x] Boot splash: `S05splash` init script writes logo.gz to `/dev/fb0`; fbcon detach timing needs work (flashes briefly) — acceptable for now
 - [x] **Bluetooth fully working** — WCN3990 BT initialized, firmware downloaded, hci0 registered (session 10)
 - [x] **boot_geni_fix.img** permanently flashed — GENI UART DMA re-arm fix + BT-capable kernel (session 10)
@@ -506,8 +506,8 @@ cpp -nostdinc -undef -D__DTS__ -x assembler-with-cpp \
 - [x] **Switched to PostmarketOS base** — dropped Buildroot approach; pmOS + phosh on Mi 9 (session 19)
 - [x] **USB networking persistent** — `usb-moded` was reconfiguring gadget; masked it; NCM at 172.16.42.1 stable (session 19)
 - [x] **phosh GUI fully working** — pixman renderer (`WLR_RENDERER=pixman` via `~/.phoshdebug`); greetd → phosh-session direct (session 19)
-- [ ] Add hived daemon to pmOS as an Alpine package
-- [ ] Set up WireGuard mesh on pmOS (hive0 interface)
+- [ ] Add nerved daemon to pmOS as an Alpine package
+- [ ] Set up WireGuard mesh on pmOS (nerve0 interface)
 - [ ] Deploy NerveOS branding (os-release, motd) to pmOS pmaports
 - [ ] Test inter-node WireGuard peering (two nodes, static peer config)
 
@@ -531,7 +531,7 @@ cpp -nostdinc -undef -D__DTS__ -x assembler-with-cpp \
 ```
 
 **Next steps for AI:**
-- Wire to `hived/internal/brain/` plugin system — LLM as resource scheduling decision maker
+- Wire to `nerved/internal/brain/` plugin system — LLM as resource scheduling decision maker
 - Add device telemetry streaming (continuous context updates)
 - Evaluate Vulkan backend for Adreno 640 acceleration (potential 5-10x speedup)
 - Consider quantized embedding model for semantic resource matching
@@ -591,7 +591,7 @@ cpp -nostdinc -undef -D__DTS__ -x assembler-with-cpp \
 
 ### pmOS Session 19 (2026-04-26) — PostmarketOS base, phosh GUI working
 
-**Direction pivot:** Dropped Buildroot rootfs + custom compositor. Now running PostmarketOS (pmOS) with phosh on Mi 9. hived + WireGuard mesh run on top of pmOS.
+**Direction pivot:** Dropped Buildroot rootfs + custom compositor. Now running PostmarketOS (pmOS) with phosh on Mi 9. nerved + WireGuard mesh run on top of pmOS.
 
 **Working setup:**
 - Boot: NerveOS 6.11 kernel (`boot_v10.img`, EFI=n, UFS fix, sofef00 fix) + pmOS phosh initramfs
@@ -621,7 +621,7 @@ The Buildroot config (`NerveOS_cepheus_defconfig`) is ready. Build produces:
 
 **To run the build in WSL2:**
 ```bash
-wsl -d Debian -u root -- bash /mnt/c/Users/Forbidden\ User/HiveOS/nerveos-build.sh
+wsl -d Debian -u root -- bash /mnt/c/Users/Forbidden\ User/NerveOS/nerveos-build.sh
 # Monitor: wsl -d Debian -u root -- tail -f /opt/NerveOS/build/cepheus/build.log
 ```
 
@@ -855,16 +855,16 @@ fastboot flash userdata /opt/NerveOS/build/cepheus/images/rootfs.ext4
 
 ### brain resource manager (session 17 — 2026-04-24)
 
-**All source files complete in `hived/internal/brain/`:**
+**All source files complete in `nerved/internal/brain/`:**
 - `action.go` — platform-agnostic `Action` interface
 - `brain.go` — Manager, Plugin interface (`Tick(SystemState) []Action`), 1s loop, UNIX socket at `/var/run/brain.sock`
 - `monitor.go` (linux) — `/proc/stat` CPU, `/proc/meminfo` RAM, per-proc `/proc/PID/stat`, `/sys/class/power_supply` battery
 - `actuator.go` (linux) — `NiceAction` (syscall.Setpriority), `OOMAction` (/proc/PID/oom_score_adj), `SwappinessAction`
-- `policy.go` — 4 plugins: ResourceGuard (hived at -10/-900), IdleThrottler (hogs > 75% CPU get nice=+10), MemoryPressure (RAM>80% → OOM+swap), PowerSaver (battery<15% → nice=+15 for non-critical)
+- `policy.go` — 4 plugins: ResourceGuard (nerved at -10/-900), IdleThrottler (hogs > 75% CPU get nice=+10), MemoryPressure (RAM>80% → OOM+swap), PowerSaver (battery<15% → nice=+15 for non-critical)
 - `socket.go` — commands: `ping`, `status` (JSON), `procs` (top 20 by CPU)
-- `hived/cmd/hived/priority_linux.go` — `init()` sets nice=-10 + oom_score_adj=-900 before main()
+- `nerved/cmd/nerved/priority_linux.go` — `init()` sets nice=-10 + oom_score_adj=-900 before main()
 
-**hived launch:** `br2-external/package/hived/hived.init` uses `-N -10` with start-stop-daemon
+**nerved launch:** `br2-external/package/nerved/nerved.init` uses `-N -10` with start-stop-daemon
 
 ### Display / Compositor — session 17 (2026-04-24)
 
@@ -965,8 +965,8 @@ fastboot flash userdata /opt/NerveOS/build/cepheus/images/rootfs.ext4
 | Term | Meaning |
 |------|---------|
 | hive | The collective of all NerveOS nodes |
-| hived | The daemon running on every NerveOS node |
-| hive0 | The WireGuard network interface on every node |
+| nerved | The daemon running on every NerveOS node |
+| nerve0 | The WireGuard network interface on every node |
 | node | A single device running NerveOS |
 | enrollment | The process of adding a new node to an existing hive |
 | Advertisement | Resource snapshot a node broadcasts to peers |

@@ -6,7 +6,7 @@ Two changes to fix SM8150 UFS link startup:
 2. Set PA_TActivate=10 before link startup (Qualcomm vendor kernel does this).
 """
 
-path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
+path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
 with open(path, 'rb') as f:
     data = f.read()
 

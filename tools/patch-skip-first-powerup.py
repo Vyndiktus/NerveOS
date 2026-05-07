@@ -8,8 +8,8 @@ HCE reset clears UFSHCI + M-PHY state machine but keeps PHY hardware registers.
 Retries still do full reinit (BCR reset + phy_init + phy_power_on).
 """
 
-h_path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.h'
-c_path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
+h_path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.h'
+c_path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
 
 # 1. Add skip_power_up_once field to struct in ufs-qcom.h
 with open(h_path) as f:

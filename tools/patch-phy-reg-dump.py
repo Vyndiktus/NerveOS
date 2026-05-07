@@ -7,7 +7,7 @@ Vendor kernel's UFS_PHY_TX_LANE_ENABLE = 0xC8 from PHY mmio base = 0x1d870C8 (se
 We also read PCS+0xC8 = 0x1d87CC8 to cover both possibilities.
 """
 
-path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
+path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
 with open(path, 'rb') as f:
     data = f.read()
 

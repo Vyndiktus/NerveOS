@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Remove PRE-LINK diagnostic entirely to test if it's causing the hang."""
 
-path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
+path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
 with open(path, 'rb') as f:
     data = f.read()
 

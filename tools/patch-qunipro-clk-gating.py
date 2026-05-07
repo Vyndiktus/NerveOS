@@ -18,7 +18,7 @@ only. SM8150 is 4.1.0 (HW_VER=0x40010000), so it IS written.
 """
 import sys
 
-path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
+path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
 with open(path) as f:
     text = f.read()
 

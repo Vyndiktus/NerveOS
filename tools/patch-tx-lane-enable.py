@@ -17,7 +17,7 @@ Two changes:
 import sys
 
 # ── Change 1: phy-qcom-qmp-ufs.c ──────────────────────────────────────────
-phy_path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/phy/qualcomm/phy-qcom-qmp-ufs.c'
+phy_path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/phy/qualcomm/phy-qcom-qmp-ufs.c'
 with open(phy_path, 'rb') as f:
     phy_data = f.read()
 
@@ -63,7 +63,7 @@ with open(phy_path, 'wb') as f:
 print('Change 1: qmp_ufs_calibrate added to phy-qcom-qmp-ufs.c')
 
 # ── Change 2: ufs-qcom.c ──────────────────────────────────────────────────
-ufs_path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
+ufs_path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
 with open(ufs_path, 'rb') as f:
     ufs_data = f.read()
 

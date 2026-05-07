@@ -5,8 +5,8 @@ null
 state
 APKINDEX
 *.apk
-hived/hived-arm64
-hived/hived
+nerved/nerved-arm64
+nerved/nerved
 tools/qrfs
 tools/test_qrtr
 .dev/

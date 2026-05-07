@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e
-cd /opt/hiveos/build/cepheus/build/linux-4a8d88483
+cd /opt/nerveos/build/cepheus/build/linux-4a8d88483
 cat arch/arm64/boot/Image.gz arch/arm64/boot/dts/qcom/sm8150-xiaomi-cepheus.dtb > /tmp/Image-with-dtb.gz
 echo "Kernel+DTB: $(ls -lh /tmp/Image-with-dtb.gz)"
 
 mkbootimg \
   --kernel /tmp/Image-with-dtb.gz \
-  --ramdisk /opt/hiveos-pcsfix90-initrd.gz \
+  --ramdisk /opt/nerveos-pcsfix90-initrd.gz \
   --cmdline "nomodeset clk_ignore_unused pd_ignore_unused console=tty0 console=ttyMSM0,115200n8 earlycon=qcom_geni,0xa90000 loglevel=8 rdinit=/init" \
   --header_version 1 \
   --pagesize 4096 \

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Add TX_FSM_STATE and UECPA diagnostic before DME_LINK_STARTUP."""
 
-path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
+path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
 with open(path) as f:
     c = f.read()
 

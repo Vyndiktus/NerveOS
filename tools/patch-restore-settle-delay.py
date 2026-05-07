@@ -8,7 +8,7 @@ UFS spec requires T_Power-on-reset (10-50ms, practical >100ms) before
 the device M-PHY TX responds to link startup frames.
 """
 
-path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
+path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
 with open(path, 'rb') as f:
     data = f.read()
 

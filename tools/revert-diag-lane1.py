@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Revert lane 1 diagnostic - DME_GET for lane 1 hangs if PHY is single-lane."""
 
-path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
+path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
 with open(path, 'rb') as f:
     data = f.read()
 

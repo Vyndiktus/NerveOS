@@ -17,11 +17,11 @@ cat $MNT/etc/fstab 2>/dev/null || echo "No fstab"
 echo "=== /etc/init.d ==="
 ls $MNT/etc/init.d/ 2>/dev/null
 
-echo "=== /usr/bin/hive CLI ==="
-file $MNT/usr/bin/hive 2>/dev/null || echo "No hive CLI"
+echo "=== /usr/bin/nerve CLI ==="
+file $MNT/usr/bin/nerve 2>/dev/null || echo "No hive CLI"
 
 echo "=== /etc/hive ==="
-ls $MNT/etc/hive/ 2>/dev/null || echo "No /etc/hive"
+ls $MNT/etc/nerve/ 2>/dev/null || echo "No /etc/hive"
 
 echo "=== /sbin/mdev or udev ==="
 ls -la $MNT/sbin/mdev 2>/dev/null || echo "No mdev"

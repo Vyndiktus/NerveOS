@@ -11,13 +11,13 @@ echo "=== udevd/udevadm binary? ==="
 ls $MNT/sbin/udev* $MNT/bin/udev* 2>/dev/null || echo "No udev binary"
 ls $MNT/lib/udev/ 2>/dev/null | head -5 || echo "No udev lib"
 
-echo "=== hived binary ==="
-file $MNT/usr/bin/hived 2>/dev/null || file $MNT/sbin/hived 2>/dev/null || echo "No hived binary"
+echo "=== nerved binary ==="
+file $MNT/usr/bin/nerved 2>/dev/null || file $MNT/sbin/nerved 2>/dev/null || echo "No nerved binary"
 
-echo "=== S99hived script ==="
-cat $MNT/etc/init.d/S99hived
+echo "=== S99nerved script ==="
+cat $MNT/etc/init.d/S99nerved
 
 echo "=== hive etc ==="
-cat $MNT/etc/hive/hived.conf
+cat $MNT/etc/nerve/nerved.conf
 
 umount $MNT

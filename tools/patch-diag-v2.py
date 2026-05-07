@@ -10,7 +10,7 @@ Changes:
 
 import sys
 
-BASE = '/opt/hiveos/build/cepheus/build/linux-4a8d88483'
+BASE = '/opt/nerveos/build/cepheus/build/linux-4a8d88483'
 
 # ── 1. PHY_INIT_COMPLETE_TIMEOUT ──────────────────────────────────────────────
 phy_path = f'{BASE}/drivers/phy/qualcomm/phy-qcom-qmp-ufs.c'

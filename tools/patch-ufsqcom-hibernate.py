@@ -3,7 +3,7 @@
    remove bootloader_phy_preserved PHY skip, clean up reinit_notify."""
 import sys
 
-path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
+path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
 with open(path, 'r') as f:
     content = f.read()
 

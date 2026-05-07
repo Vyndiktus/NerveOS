@@ -5,7 +5,7 @@ link_startup_notify(PRE_CHANGE). Running a DME_GET before HCE is complete
 causes a 500ms timeout + late interrupt that may corrupt HCI state.
 """
 
-path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
+path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
 with open(path, 'rb') as f:
     data = f.read()
 

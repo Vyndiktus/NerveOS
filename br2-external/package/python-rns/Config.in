@@ -9,6 +9,6 @@ config BR2_PACKAGE_PYTHON_RNS
 	  packet radio, and anything in between.
 
 	  Provides rnsd (daemon), rnstatus, rnpath, and the RNS Python API
-	  used by hived for multi-transport peer discovery.
+	  used by nerved for multi-transport peer discovery.
 
 	  https://github.com/markqvist/Reticulum

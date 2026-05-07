@@ -22,7 +22,7 @@ Fix: add as the first entry so it is written during qmp_ufs_init_registers()
 """
 import sys
 
-path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/phy/qualcomm/phy-qcom-qmp-ufs.c'
+path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/phy/qualcomm/phy-qcom-qmp-ufs.c'
 with open(path) as f:
     text = f.read()
 

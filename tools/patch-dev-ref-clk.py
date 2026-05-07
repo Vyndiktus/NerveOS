@@ -20,7 +20,7 @@ Also adds REG_UFS_CFG1 to PRE-LINK diagnostic for confirmation.
 """
 import sys
 
-path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
+path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
 with open(path) as f:
     text = f.read()
 

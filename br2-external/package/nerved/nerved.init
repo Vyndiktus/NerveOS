@@ -1,0 +1,28 @@
+#!/bin/sh
+# NerveOS daemon init script (SysV style)
+
+DAEMON=/usr/bin/nerved
+PIDFILE=/var/run/nerved.pid
+CONFIG=/etc/nerve/nerved.conf
+
+case "$1" in
+  start)
+    echo "Starting nerved..."
+    start-stop-daemon -S -b -p $PIDFILE -N -10 -x $DAEMON -- --config $CONFIG
+    ;;
+  stop)
+    echo "Stopping nerved..."
+    start-stop-daemon -K -p $PIDFILE
+    ;;
+  restart)
+    $0 stop
+    sleep 1
+    $0 start
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+    ;;
+esac
+
+exit 0

@@ -1,6 +1,6 @@
 #!/bin/bash
-IMG=/opt/hiveos/build/cepheus/build/linux-4a8d88483/arch/arm64/boot/Image.gz
-DTB=/opt/hiveos/build/cepheus/build/linux-4a8d88483/arch/arm64/boot/dts/qcom/sm8150-xiaomi-cepheus.dtb
+IMG=/opt/nerveos/build/cepheus/build/linux-4a8d88483/arch/arm64/boot/Image.gz
+DTB=/opt/nerveos/build/cepheus/build/linux-4a8d88483/arch/arm64/boot/dts/qcom/sm8150-xiaomi-cepheus.dtb
 RAMDISK=/tmp/ramdisk.cpio.gz
 OUT=/opt/nerveos-boot-noptimer.img
 

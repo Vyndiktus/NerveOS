@@ -42,6 +42,6 @@ Boot the device once into MIUI to confirm it works, then you're ready to flash N
 # Put device back into fastboot
 # Power off → hold Vol- + Power
 
-python tools/hive-identify.py     # confirm device is detected
+python tools/nerve-identify.py     # confirm device is detected
 make flash DEVICE=cepheus          # flash NerveOS
 ```

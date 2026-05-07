@@ -1,3 +1,3 @@
-source "$BR2_EXTERNAL_NERVEOS_PATH/package/hived/Config.in"
+source "$BR2_EXTERNAL_NERVEOS_PATH/package/nerved/Config.in"
 source "$BR2_EXTERNAL_NERVEOS_PATH/package/python-rns/Config.in"
 source "$BR2_EXTERNAL_NERVEOS_PATH/package/nerveos-shell/Config.in"

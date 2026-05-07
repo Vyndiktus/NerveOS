@@ -5,7 +5,7 @@ BCR reset + mainline PHY re-init doesn't produce a working PHY state on SM8150.
 Instead: first boot uses bootloader's config, retries do full mainline re-init.
 """
 
-path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
+path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
 with open(path, 'rb') as f:
     data = f.read()
 

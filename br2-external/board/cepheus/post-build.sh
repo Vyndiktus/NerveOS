@@ -9,13 +9,13 @@ BINARIES_DIR="$(dirname "$TARGET_DIR")/images"
 echo "[NerveOS] Post-build: cepheus"
 
 # Install default hive config if not present
-if [ ! -f "$TARGET_DIR/etc/hive/hived.conf" ]; then
+if [ ! -f "$TARGET_DIR/etc/nerve/nerved.conf" ]; then
     mkdir -p "$TARGET_DIR/etc/hive"
-    cp "$BOARD_DIR/hived.conf.default" "$TARGET_DIR/etc/hive/hived.conf"
+    cp "$BOARD_DIR/nerved.conf.default" "$TARGET_DIR/etc/nerve/nerved.conf"
 fi
 
 # Ensure init scripts are executable
-chmod +x "$TARGET_DIR/etc/init.d/S99hived" 2>/dev/null || true
+chmod +x "$TARGET_DIR/etc/init.d/S99nerved" 2>/dev/null || true
 chmod +x "$TARGET_DIR/etc/init.d/S80nerveos-shell" 2>/dev/null || true
 
 # Add dbus system user if Buildroot's dbus package didn't create it

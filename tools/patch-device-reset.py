@@ -3,7 +3,7 @@
 The device reset via GPIO 175 is needed after HIBERNATE_ENTER fails,
 to put the UFS device back to a known (DISABLED) state."""
 
-path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
+path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
 with open(path, 'r') as f:
     content = f.read()
 

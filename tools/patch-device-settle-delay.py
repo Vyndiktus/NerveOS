@@ -5,7 +5,7 @@ Device reset happens ~12ms before first link startup; UFS spec requires
 T_Power-on-reset (10-50ms) before device responds to link startup frames.
 """
 
-path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
+path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
 with open(path, 'rb') as f:
     data = f.read()
 

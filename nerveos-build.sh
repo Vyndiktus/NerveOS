@@ -4,7 +4,7 @@
 #   Start-Process wsl.exe -ArgumentList '-d','Debian','-u','root','/opt/NerveOS-project/nerveos-build.sh' -WindowStyle Hidden
 #
 # First-time setup (once per WSL2 session — mount is lost on restart):
-#   wsl -d Debian -u root -e bash -c "mkdir -p /opt/NerveOS-project && mount --bind '/mnt/c/Users/Forbidden User/HiveOS' /opt/NerveOS-project"
+#   wsl -d Debian -u root -e bash -c "mkdir -p /opt/NerveOS-project && mount --bind '/mnt/c/Users/Forbidden User/NerveOS' /opt/NerveOS-project"
 #
 # Buildroot cannot handle spaces in paths; the bind mount provides a space-free alias.
 set -e
@@ -20,7 +20,7 @@ LOG=$BUILD/build.log
 # Re-create bind mount if it was lost (WSL2 restart)
 if [ ! -f $SRC/Makefile ]; then
     mkdir -p $SRC
-    mount --bind '/mnt/c/Users/Forbidden User/HiveOS' $SRC
+    mount --bind '/mnt/c/Users/Forbidden User/NerveOS' $SRC
 fi
 
 mkdir -p $BUILD

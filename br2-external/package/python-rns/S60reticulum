@@ -1,5 +1,5 @@
 #!/bin/sh
-# S60reticulum — HiveOS Reticulum Network Stack daemon
+# S60reticulum — NerveOS Reticulum Network Stack daemon
 # Starts rnsd, which manages encrypted transport over all available interfaces.
 # Runs after batman-adv (S50) so RNS can use bat0 as a transport.
 

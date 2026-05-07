@@ -18,7 +18,7 @@ NOT the PHY PCS TIMER_20US registers. These must be in the PHY init table.
 
 import sys
 
-phy_path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/phy/qualcomm/phy-qcom-qmp-ufs.c'
+phy_path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/phy/qualcomm/phy-qcom-qmp-ufs.c'
 with open(phy_path, 'r') as f:
     text = f.read()
 

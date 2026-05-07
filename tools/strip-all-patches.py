@@ -2,7 +2,7 @@
 """Strip ALL our patches - return to clean mainline kernel state."""
 
 # Strip POST-LINK-FAIL from ufshcd.c
-ufshcd_path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/core/ufshcd.c'
+ufshcd_path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/core/ufshcd.c'
 with open(ufshcd_path, 'rb') as f:
     data = f.read()
 
@@ -31,5 +31,5 @@ with open(ufshcd_path, 'wb') as f:
 
 print('Done. All patches stripped.')
 print('Remaining in ufshcd.c:', b'POST-LINK-FAIL' in data)
-print('Remaining in ufs-qcom.c PRE-LINK:', open('/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c', 'rb').read().find(b'PRE-LINK:') >= 0)
-print('Remaining in ufs-qcom.c teardown:', open('/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c', 'rb').read().find(b'Tear down PHY') >= 0)
+print('Remaining in ufs-qcom.c PRE-LINK:', open('/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c', 'rb').read().find(b'PRE-LINK:') >= 0)
+print('Remaining in ufs-qcom.c teardown:', open('/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c', 'rb').read().find(b'Tear down PHY') >= 0)

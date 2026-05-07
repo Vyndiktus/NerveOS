@@ -5,7 +5,7 @@ and DME_VS_CORE_CLK_CTRL. Also set CFG0 to 3s to test if short timer is the caus
 """
 import sys
 
-path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
+path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
 with open(path) as f:
     text = f.read()
 

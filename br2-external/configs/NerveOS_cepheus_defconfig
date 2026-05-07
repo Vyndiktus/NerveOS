@@ -73,7 +73,7 @@ BR2_PACKAGE_UTIL_LINUX=y
 BR2_PACKAGE_DROPBEAR=y
 
 # ── NerveOS daemon ────────────────────────────────────────────────
-BR2_PACKAGE_HIVED=y
+BR2_PACKAGE_NERVED=y
 
 # ── Display stack ─────────────────────────────────────────────────
 # Mesa dependencies

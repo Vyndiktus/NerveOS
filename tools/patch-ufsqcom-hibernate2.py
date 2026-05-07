@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Patch ufs-qcom.c with exact patterns."""
 
-path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
+path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/host/ufs-qcom.c'
 with open(path, 'r') as f:
     content = f.read()
 

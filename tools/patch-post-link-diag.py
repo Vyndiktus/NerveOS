@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Add post-failure UECPA diagnostic right after dme_link_startup fails in ufshcd.c."""
 
-path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/core/ufshcd.c'
+path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/core/ufshcd.c'
 with open(path) as f:
     c = f.read()
 

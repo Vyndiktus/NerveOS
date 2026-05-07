@@ -5,7 +5,7 @@
 #   make DEVICE=cepheus         # Build image for a device
 #   make flash DEVICE=cepheus   # Flash image to connected device
 #   make identify               # Identify USB-connected devices
-#   make hived                  # Build hived daemon (native, for testing)
+#   make nerved                  # Build nerved daemon (native, for testing)
 
 DEVICE       ?= cepheus
 BR_VERSION   ?= 2024.02
@@ -15,7 +15,7 @@ BUILD_DIR    := build/$(DEVICE)
 IMAGES_DIR   := build/images/$(DEVICE)
 PYTHON       := python3
 
-.PHONY: all setup buildroot-clone image flash identify hived clean help
+.PHONY: all setup buildroot-clone image flash identify nerved clean help
 
 all: image
 
@@ -59,29 +59,29 @@ menuconfig: buildroot-clone
 
 ## flash: Flash a pre-built image to a connected device via USB
 flash:
-	$(PYTHON) tools/hive-flash.py --device $(DEVICE) $(if $(SERIAL),--serial $(SERIAL),)
+	$(PYTHON) tools/nerve-flash.py --device $(DEVICE) $(if $(SERIAL),--serial $(SERIAL),)
 
 ## flash-dry: Dry-run flash (no writes)
 flash-dry:
-	$(PYTHON) tools/hive-flash.py --device $(DEVICE) --dry-run
+	$(PYTHON) tools/nerve-flash.py --device $(DEVICE) --dry-run
 
 ## identify: Identify USB-connected devices and match to NerveOS profiles
 identify:
-	$(PYTHON) tools/hive-identify.py
+	$(PYTHON) tools/nerve-identify.py
 
 ## identify-watch: Continuously watch for USB device connections
 identify-watch:
-	$(PYTHON) tools/hive-identify.py --watch
+	$(PYTHON) tools/nerve-identify.py --watch
 
-## hived: Build the hive daemon natively (for testing on host)
-hived:
-	cd hived && go build -o ../build/hived ./cmd/hived
-	@echo "[NerveOS] hived built: build/hived"
+## nerved: Build the hive daemon natively (for testing on host)
+nerved:
+	cd nerved && go build -o ../build/nerved ./cmd/nerved
+	@echo "[NerveOS] nerved built: build/nerved"
 
-## hived-arm64: Cross-compile hived for ARM64 (cepheus target)
-hived-arm64:
-	cd hived && GOOS=linux GOARCH=arm64 go build -o ../build/hived-arm64 ./cmd/hived
-	@echo "[NerveOS] hived built: build/hived-arm64"
+## nerved-arm64: Cross-compile nerved for ARM64 (cepheus target)
+nerved-arm64:
+	cd nerved && GOOS=linux GOARCH=arm64 go build -o ../build/nerved-arm64 ./cmd/nerved
+	@echo "[NerveOS] nerved built: build/nerved-arm64"
 
 ## clean: Remove build artifacts
 clean:

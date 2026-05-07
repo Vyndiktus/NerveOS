@@ -1,9 +1,9 @@
 #!/bin/bash
-# Rebuild hiveos-static-initrd.gz with correct init script
+# Rebuild nerveos-static-initrd.gz with correct init script
 set -e
 
 SRC=/opt/initramfs-static
-OUT=/opt/hiveos-static-initrd.gz
+OUT=/opt/nerveos-static-initrd.gz
 
 # Write a proper init script
 cat > "$SRC/init" << 'INITEOF'
@@ -17,7 +17,7 @@ mount -t configfs none /sys/kernel/config 2>/dev/null
 # UART shell - always accessible via ttyMSM0
 /sbin/getty -n -l /bin/sh ttyMSM0 115200 vt100 &
 
-echo "=== HiveOS - waiting for UDC ==="
+echo "=== NerveOS - waiting for UDC ==="
 i=0
 while [ $i -lt 60 ]; do
   UDC=$(ls /sys/class/udc/ 2>/dev/null | head -1)
@@ -41,7 +41,7 @@ mkdir -p "$G"
 echo 0x1d6b > "$G/idVendor"
 echo 0x0104 > "$G/idProduct"
 mkdir -p "$G/strings/0x409"
-echo HiveOS > "$G/strings/0x409/manufacturer"
+echo NerveOS > "$G/strings/0x409/manufacturer"
 echo Debug > "$G/strings/0x409/product"
 echo 00000001 > "$G/strings/0x409/serialnumber"
 mkdir -p "$G/functions/acm.0"

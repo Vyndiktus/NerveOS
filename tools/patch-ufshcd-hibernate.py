@@ -2,7 +2,7 @@
 """Patch ufshcd.c to add HIBERNATE_BEFORE_HCE logic before BROKEN_HCE check."""
 import sys
 
-path = '/opt/hiveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/core/ufshcd.c'
+path = '/opt/nerveos/build/cepheus/build/linux-4a8d88483/drivers/ufs/core/ufshcd.c'
 with open(path, 'r') as f:
     content = f.read()
 
