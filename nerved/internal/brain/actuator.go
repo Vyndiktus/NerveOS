@@ -8,13 +8,6 @@ import (
 	"syscall"
 )
 
-// Action is an operation the brain wants to perform on the system.
-// Actuator.Apply calls it; plugins return slices of Actions from Tick.
-type Action interface {
-	Apply() error
-	String() string
-}
-
 // Actuator applies Actions and logs failures. It is intentionally thin —
 // all decision logic lives in plugins.
 type Actuator struct{}
