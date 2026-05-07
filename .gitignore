@@ -7,4 +7,6 @@ APKINDEX
 *.apk
 hived/hived-arm64
 hived/hived
+tools/qrfs
+tools/test_qrtr
 .claude/

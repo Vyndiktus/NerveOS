@@ -232,7 +232,7 @@ Key config fragment additions (`kernel-NerveOS.config`):
 - Build log: `/opt/NerveOS/build/cepheus/build.log`
 - Launch: `Start-Process -FilePath 'wsl.exe' -ArgumentList '-d','Debian','-u','root','bash','/opt/NerveOS-build.sh' -WindowStyle Hidden`
 - Proxmox token: stored in WSL2 `~/.config/NerveOS/proxmox.env`
-- NerveOS-dev-01 container: VMID 110, IP 10.1.0.36, Debian 12 (SSH alias `NerveOS-dev-01`)
+- NerveOS-dev-01 container: Debian 12 LXC on Proxmox (SSH alias `NerveOS-dev-01`)
 
 ### IMPORTANT: Stamp management for incremental kernel builds
 When Buildroot stops mid-kernel-build and you need to apply a fix:
@@ -257,8 +257,8 @@ When Buildroot stops mid-kernel-build and you need to apply a fix:
 - [x] Bootloader unlock documentation for cepheus
 - [x] **Bootloader unlocked** on physical Mi 9
 - [x] **Kernel builds successfully** — vmlinux linked, Image.gz generated (session 2)
-- [x] NerveOS-dev-01 LXC container on Proxmox (10.1.0.36) — hived tested and running
-- [x] Proxmox API token configured (`root@pam!NerveOS`)
+- [x] NerveOS-dev-01 LXC container on Proxmox — hived tested and running
+- [x] Proxmox API token configured
 
 ### Mainline kernel boot — session 3 (2026-04-19)
 
@@ -596,7 +596,7 @@ cpp -nostdinc -undef -D__DTS__ -x assembler-with-cpp \
 **Working setup:**
 - Boot: NerveOS 6.11 kernel (`boot_v10.img`, EFI=n, UFS fix, sofef00 fix) + pmOS phosh initramfs
 - Rootfs: pmOS phosh image (`pmOS-cepheus-rootfs-v4.img`) flashed to Android `userdata` partition
-- SSH: `ssh -i ~/.ssh/root.pem user@172.16.42.1` (key at `/home/user/.ssh/root.pem` in WSL), password `147147`
+- SSH: `ssh -i ~/.ssh/root.pem user@172.16.42.1` (key at `/home/user/.ssh/root.pem` in WSL)
 - Phosh: running directly via `greetd → phosh-session` (no phrog greeter, no lock screen)
 
 **Key fixes for pmOS:**
