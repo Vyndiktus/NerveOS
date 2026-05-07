@@ -1,0 +1,18 @@
+diff --git a/net/qrtr/af_qrtr.c b/net/qrtr/af_qrtr.c
+index 41ece61eb..a359997bb 100644
+--- a/net/qrtr/af_qrtr.c
++++ b/net/qrtr/af_qrtr.c
+@@ -500,7 +500,12 @@ int qrtr_endpoint_post(struct qrtr_endpoint *ep, const void *data, size_t len)
+ 	if (cb->dst_port == QRTR_PORT_CTRL_LEGACY)
+ 		cb->dst_port = QRTR_PORT_CTRL;
+ 
+-	if (!size || len != ALIGN(size, 4) + hdrlen)
++	/* Modem post-crash HELLO has size=0 in header but valid payload (len > hdrlen).
++	 * Fix up size so the ALIGN check passes. */
++	if (size == 0 && len > hdrlen)
++		size = len - hdrlen;
++
++	if (len != ALIGN(size, 4) + hdrlen)
+ 		goto err;
+ 
+ 	if ((cb->type == QRTR_TYPE_NEW_SERVER ||

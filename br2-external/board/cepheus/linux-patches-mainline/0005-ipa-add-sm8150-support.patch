@@ -1,0 +1,210 @@
+diff --git a/drivers/net/ipa/Makefile b/drivers/net/ipa/Makefile
+index d3abb3863..27445223c 100644
+--- a/drivers/net/ipa/Makefile
++++ b/drivers/net/ipa/Makefile
+@@ -7,7 +7,7 @@ IPA_REG_VERSIONS	:=	3.1 3.5.1 4.2 4.5 4.7 4.9 4.11 5.0 5.5
+ # Some IPA versions can reuse another set of GSI register definitions.
+ GSI_REG_VERSIONS	:=	3.1 3.5.1 4.0 4.5 4.9 4.11 5.0
+ 
+-IPA_DATA_VERSIONS	:=	3.1 3.5.1 4.2 4.5 4.7 4.9 4.11 5.0 5.5
++IPA_DATA_VERSIONS	:=	3.1 3.5.1 4.1 4.2 4.5 4.7 4.9 4.11 5.0 5.5
+ 
+ obj-$(CONFIG_QCOM_IPA)	+=	ipa.o
+ 
+diff --git a/drivers/net/ipa/gsi_reg.c b/drivers/net/ipa/gsi_reg.c
+index 825598661..94b467eda 100644
+--- a/drivers/net/ipa/gsi_reg.c
++++ b/drivers/net/ipa/gsi_reg.c
+@@ -96,6 +96,7 @@ static const struct regs *gsi_regs(struct gsi *gsi)
+ 	case IPA_VERSION_3_5_1:
+ 		return &gsi_regs_v3_5_1;
+ 
++	case IPA_VERSION_4_1:  /* SM8150 GSI 2.0, same as SC7180 v4.2 */
+ 	case IPA_VERSION_4_2:
+ 		return &gsi_regs_v4_0;
+ 
+diff --git a/drivers/net/ipa/ipa_data.h b/drivers/net/ipa/ipa_data.h
+index d88cbbbf1..d08a1c070 100644
+--- a/drivers/net/ipa/ipa_data.h
++++ b/drivers/net/ipa/ipa_data.h
+@@ -244,6 +244,7 @@ struct ipa_data {
+ 
+ extern const struct ipa_data ipa_data_v3_1;
+ extern const struct ipa_data ipa_data_v3_5_1;
++extern const struct ipa_data ipa_data_v4_1;
+ extern const struct ipa_data ipa_data_v4_2;
+ extern const struct ipa_data ipa_data_v4_5;
+ extern const struct ipa_data ipa_data_v4_7;
+diff --git a/drivers/net/ipa/ipa_main.c b/drivers/net/ipa/ipa_main.c
+index 5f3dd5a2d..92fddcce6 100644
+--- a/drivers/net/ipa/ipa_main.c
++++ b/drivers/net/ipa/ipa_main.c
+@@ -652,6 +652,9 @@ static const struct of_device_id ipa_match[] = {
+ 	{
+ 		.compatible	= "qcom,sdm845-ipa",
+ 		.data		= &ipa_data_v3_5_1,
++	}, {
++		.compatible	= "qcom,sm8150-ipa",
++		.data		= &ipa_data_v4_1,
+ 	},
+ 	{
+ 		.compatible	= "qcom,sc7180-ipa",
+@@ -816,6 +819,7 @@ static int ipa_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	loader = ipa_firmware_loader(dev);
++	pr_err("ipa_probe: loader=%d\n", (int)loader);
+ 	if (loader == IPA_LOADER_INVALID)
+ 		return -EINVAL;
+ 	if (loader == IPA_LOADER_DEFER)
+@@ -825,6 +829,7 @@ static int ipa_probe(struct platform_device *pdev)
+ 	 * might return -EPROBE_DEFER.
+ 	 */
+ 	interrupt = ipa_interrupt_init(pdev);
++	pr_err("ipa_probe: interrupt=%ld\n", IS_ERR(interrupt) ? PTR_ERR(interrupt) : 0);
+ 	if (IS_ERR(interrupt))
+ 		return PTR_ERR(interrupt);
+ 
+@@ -832,6 +837,7 @@ static int ipa_probe(struct platform_device *pdev)
+ 	 * so this might return -EPROBE_DEFER.
+ 	 */
+ 	power = ipa_power_init(dev, data->power_data);
++	pr_err("ipa_probe: power=%ld\n", IS_ERR(power) ? PTR_ERR(power) : 0);
+ 	if (IS_ERR(power)) {
+ 		ret = PTR_ERR(power);
+ 		goto err_interrupt_exit;
+@@ -853,14 +859,17 @@ static int ipa_probe(struct platform_device *pdev)
+ 	init_completion(&ipa->completion);
+ 
+ 	ret = ipa_reg_init(ipa, pdev);
++	pr_err("ipa_probe: reg_init=%d\n", ret);
+ 	if (ret)
+ 		goto err_kfree_ipa;
+ 
+ 	ret = ipa_mem_init(ipa, pdev, data->mem_data);
++	pr_err("ipa_probe: mem_init=%d\n", ret);
+ 	if (ret)
+ 		goto err_reg_exit;
+ 
+ 	ret = ipa_cmd_init(ipa);
++	pr_err("ipa_probe: cmd_init=%d\n", ret);
+ 	if (ret)
+ 		goto err_mem_exit;
+ 
+@@ -879,6 +888,7 @@ static int ipa_probe(struct platform_device *pdev)
+ 		goto err_endpoint_exit;
+ 
+ 	ret = ipa_smp2p_init(ipa, pdev, loader == IPA_LOADER_MODEM);
++	pr_err("ipa_probe: smp2p_init=%d\n", ret);
+ 	if (ret)
+ 		goto err_table_exit;
+ 
+@@ -888,6 +898,7 @@ static int ipa_probe(struct platform_device *pdev)
+ 		goto err_power_put;
+ 
+ 	ret = ipa_config(ipa, data);
++	pr_err("ipa_probe: config=%d\n", ret);
+ 	if (ret)
+ 		goto err_power_put;
+ 
+diff --git a/drivers/net/ipa/ipa_modem.c b/drivers/net/ipa/ipa_modem.c
+index 8fe0d0e1a..f01c7db1b 100644
+--- a/drivers/net/ipa/ipa_modem.c
++++ b/drivers/net/ipa/ipa_modem.c
+@@ -19,6 +19,7 @@
+ #include "ipa_endpoint.h"
+ #include "ipa_mem.h"
+ #include "ipa_modem.h"
++#include "ipa_qmi.h"
+ #include "ipa_smp2p.h"
+ #include "ipa_table.h"
+ #include "ipa_uc.h"
+@@ -448,6 +449,10 @@ static int ipa_modem_notify(struct notifier_block *nb, unsigned long action,
+ 		dev_info(dev, "received modem starting event\n");
+ 		ipa_uc_power(ipa);
+ 		ipa_smp2p_notify_reset(ipa);
++		/* Tell modem IPA clock is on */
++		ipa_smp2p_notify_ap(ipa);
++		/* Register IPA QMI host service now so modem finds it on QRTR */
++		ipa_qmi_setup(ipa);
+ 		break;
+ 
+ 	case QCOM_SSR_AFTER_POWERUP:
+diff --git a/drivers/net/ipa/ipa_qmi.c b/drivers/net/ipa/ipa_qmi.c
+index d771f3a71..a952d476d 100644
+--- a/drivers/net/ipa/ipa_qmi.c
++++ b/drivers/net/ipa/ipa_qmi.c
+@@ -470,6 +470,10 @@ int ipa_qmi_setup(struct ipa *ipa)
+ 	struct ipa_qmi *ipa_qmi = &ipa->qmi;
+ 	int ret;
+ 
++	/* Idempotent: skip if already registered (e.g. called early from BEFORE_POWERUP) */
++	if (ipa_qmi->server_handle.sock)
++		return 0;
++
+ 	ipa_qmi->initial_boot = true;
+ 
+ 	/* The server handle is used to handle the DRIVER_INIT_COMPLETE
+diff --git a/drivers/net/ipa/ipa_reg.c b/drivers/net/ipa/ipa_reg.c
+index c574f798f..187c2eecb 100644
+--- a/drivers/net/ipa/ipa_reg.c
++++ b/drivers/net/ipa/ipa_reg.c
+@@ -114,7 +114,8 @@ static const struct regs *ipa_regs(enum ipa_version version)
+ 		return &ipa_regs_v3_1;
+ 	case IPA_VERSION_3_5_1:
+ 		return &ipa_regs_v3_5_1;
+-	case IPA_VERSION_4_2:
++	case IPA_VERSION_4_1:
++		case IPA_VERSION_4_2:
+ 		return &ipa_regs_v4_2;
+ 	case IPA_VERSION_4_5:
+ 		return &ipa_regs_v4_5;
+diff --git a/drivers/net/ipa/ipa_smp2p.c b/drivers/net/ipa/ipa_smp2p.c
+index fcaadd111..703a60dde 100644
+--- a/drivers/net/ipa/ipa_smp2p.c
++++ b/drivers/net/ipa/ipa_smp2p.c
+@@ -218,6 +218,33 @@ static void ipa_smp2p_power_release(struct ipa *ipa)
+ 	ipa->smp2p->power_on = false;
+ }
+ 
++/* Proactively tell the modem that IPA power is on.
++ * Called from SSR BEFORE_POWERUP — IPA runtime PM may show suspended but
++ * the driver is active; bypass pm_runtime_get_if_active() and force clock=ON. */
++void ipa_smp2p_notify_ap(struct ipa *ipa)
++{
++	struct ipa_smp2p *smp2p = ipa->smp2p;
++	u32 mask;
++
++	if (!smp2p || smp2p->notified)
++		return;
++
++	pr_err("ipa_smp2p_notify_ap: forcing ipa-clock-enabled=1 valid=1\n");
++
++	/* Signal IPA clock is on (bypass pm_runtime check — IPA driver is active) */
++	mask = BIT(smp2p->enabled_bit);
++	qcom_smem_state_update_bits(smp2p->enabled_state, mask, mask);
++
++	/* Signal the enabled bit is valid */
++	mask = BIT(smp2p->valid_bit);
++	qcom_smem_state_update_bits(smp2p->valid_state, mask, mask);
++
++	/* power_on=false: we bypassed pm_runtime, so power_release must not put an
++	 * uncounted reference. The SMP2P bits are already set correctly. */
++	smp2p->power_on = false;
++	smp2p->notified = true;
++}
++
+ /* Initialize the IPA SMP2P subsystem */
+ int
+ ipa_smp2p_init(struct ipa *ipa, struct platform_device *pdev, bool modem_init)
+diff --git a/drivers/net/ipa/ipa_smp2p.h b/drivers/net/ipa/ipa_smp2p.h
+index 2a3d8eefb..2275c0b26 100644
+--- a/drivers/net/ipa/ipa_smp2p.h
++++ b/drivers/net/ipa/ipa_smp2p.h
+@@ -46,5 +46,6 @@ void ipa_smp2p_irq_disable_setup(struct ipa *ipa);
+  * for managing this notification.
+  */
+ void ipa_smp2p_notify_reset(struct ipa *ipa);
++void ipa_smp2p_notify_ap(struct ipa *ipa);
+ 
+ #endif /* _IPA_SMP2P_H_ */

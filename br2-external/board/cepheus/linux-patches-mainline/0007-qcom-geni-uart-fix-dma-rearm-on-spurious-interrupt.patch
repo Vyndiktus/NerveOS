@@ -1,0 +1,59 @@
+From ebc3d192687bd8e3f611e8f7e664cc103f5f369b Mon Sep 17 00:00:00 2001
+From: Vynnie Von Diktus <vyndiktus@gmail.com>
+Date: Wed, 22 Apr 2026 15:48:22 +0000
+Subject: [PATCH] tty: serial: qcom-geni: re-arm RX DMA on spurious zero-length
+ interrupt
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+qcom_geni_serial_handle_rx_dma() returns early when SE_DMA_RX_LEN_IN
+reads as zero, interpreting it as a spurious interrupt. The early return
+skips geni_se_rx_dma_prep(), leaving the RX DMA descriptor permanently
+unarmed. All subsequently received bytes are silently dropped until the
+port is closed and reopened.
+
+On cold boots, chip startup transients on the UART lines can produce a
+genuine spurious DMA interrupt with a zero-length count. The bug is
+invisible on warm reboots (the UART stays powered and stable, so no
+spurious interrupt fires), which makes it appear as an intermittent
+failure only on power-cycle reboots.
+
+Fix by restructuring the zero-length check to fall through to
+geni_se_rx_dma_prep() in all cases. Only the data processing
+(handle_rx_uart) is skipped when no bytes arrived.
+
+Tested on SM8150 (Snapdragon 855) with a WCN3990 BT UART — Bluetooth
+firmware download now succeeds on every cold boot without
+"Frame reassembly failed" errors.
+
+The same GENI serial IP block is used across SDM845, SM8150, SM8250,
+SM8350 and many other Snapdragon SoCs; the bug and fix are expected to
+apply to all of them.
+
+Signed-off-by: Vynnie Von Diktus <vyndiktus@gmail.com>
+---
+ drivers/tty/serial/qcom_geni_serial.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/tty/serial/qcom_geni_serial.c b/drivers/tty/serial/qcom_geni_serial.c
+index 69a632fef..3c950bdc0 100644
+--- a/drivers/tty/serial/qcom_geni_serial.c
++++ b/drivers/tty/serial/qcom_geni_serial.c
+@@ -837,11 +837,9 @@ static void qcom_geni_serial_handle_rx_dma(struct uart_port *uport, bool drop)
+ 	rx_in = readl(uport->membase + SE_DMA_RX_LEN_IN);
+ 	if (!rx_in) {
+ 		dev_warn(uport->dev, "serial engine reports 0 RX bytes in!\n");
+-		return;
+-	}
+-
+-	if (!drop)
++	} else if (!drop) {
+ 		handle_rx_uart(uport, rx_in, drop);
++	}
+ 
+ 	ret = geni_se_rx_dma_prep(&port->se, port->rx_buf,
+ 				  DMA_RX_BUF_SIZE,
+-- 
+2.47.3
+

@@ -9,6 +9,7 @@ nerved/nerved-arm64
 nerved/nerved
 tools/qrfs
 tools/test_qrtr
+rootfs-overlay/usr/bin/qrfs
 .dev/
 .claude/
 PROJECT.md
